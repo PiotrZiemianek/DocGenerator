@@ -1,7 +1,9 @@
 package pl.piotrziemianek.domain;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -10,7 +12,8 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 
 @Entity
@@ -28,7 +31,7 @@ public class TherapiesCard implements Serializable {
     @JoinColumn(name = "patient_id")
     private Patient patient;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate yearMonth;
 
     @OneToMany(mappedBy = "therapiesCard", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -61,11 +64,19 @@ public class TherapiesCard implements Serializable {
             this.patient = null;
         }
     }
-    public void deletePatient(){
-        setPatient(null);
+
+    /**
+     * Delete patient in <i>this</i> TherapiesCard object but not delete <i>this</i> from patient TherapiesCardList.
+     */
+    public void deletePatient() {
+        patient = null;
     }
-    public void deleteTherapist(){
-        setTherapist(null);
+
+    /**
+     * Delete therapist in <i>this</i> TherapiesCard object but not delete <i>this</i> from therapist TherapiesCardList.
+     */
+    public void deleteTherapist() {
+        therapist = null;
     }
 
     public void addTherapy(Therapy therapy) {
@@ -87,5 +98,23 @@ public class TherapiesCard implements Serializable {
                 ", therapist= " + therapist.getFirstName() + therapist.getLastName() +
                 ", patient= " + patient.getFirstName() + therapist.getLastName() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TherapiesCard that = (TherapiesCard) o;
+
+        if (id != that.id) return false;
+        return yearMonth != null ? yearMonth.equals(that.yearMonth) : that.yearMonth == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (yearMonth != null ? yearMonth.hashCode() : 0);
+        return result;
     }
 }

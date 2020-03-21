@@ -1,9 +1,6 @@
 package pl.piotrziemianek.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,7 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 
 @Entity
@@ -58,4 +56,21 @@ public class Therapy implements Serializable {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Therapy therapy = (Therapy) o;
+
+        if (id != therapy.id) return false;
+        return therapyDate != null ? therapyDate.equals(therapy.therapyDate) : therapy.therapyDate == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (therapyDate != null ? therapyDate.hashCode() : 0);
+        return result;
+    }
 }

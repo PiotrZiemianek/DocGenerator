@@ -1,22 +1,21 @@
 package pl.piotrziemianek.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 
 @Entity
-@Table(uniqueConstraints=
-@UniqueConstraint(columnNames={"firstName","lastName"}))
+@Table(uniqueConstraints =
+@UniqueConstraint(columnNames = {"firstName", "lastName"}))
 public class Patient implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +27,10 @@ public class Patient implements Serializable {
     @Column(nullable = false)
     private String lastName;
 
-    @ManyToMany(mappedBy = "patients", cascade = CascadeType.PERSIST)
-    private Set<Therapist> therapists;
+    @ManyToMany(mappedBy = "patients", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private Set<Therapist> therapists = new HashSet<>();
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private List<TherapiesCard> therapiesCardList = new ArrayList<>();
 
     @Builder
@@ -53,5 +52,25 @@ public class Patient implements Serializable {
         if (remove) {
             therapist.getPatients().remove(this);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Patient patient = (Patient) o;
+
+        if (id != patient.id) return false;
+        if (!firstName.equals(patient.firstName)) return false;
+        return lastName.equals(patient.lastName);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + firstName.hashCode();
+        result = 31 * result + lastName.hashCode();
+        return result;
     }
 }

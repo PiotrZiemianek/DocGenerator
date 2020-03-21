@@ -4,6 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import pl.piotrziemianek.domain.Patient;
+import pl.piotrziemianek.domain.TherapiesCard;
 import pl.piotrziemianek.util.HibernateUtil;
 
 import java.util.List;
@@ -34,6 +35,8 @@ public class PatientDao implements CrudAccessible<Patient> {
     @Override
     public int create(Patient entity) {
         runInTransaction(session -> {
+            entity.getTherapiesCardList().forEach(session::saveOrUpdate);
+            entity.getTherapists().forEach(session::saveOrUpdate);
             session.save(entity);
         });
         return entity.getId();
@@ -41,29 +44,59 @@ public class PatientDao implements CrudAccessible<Patient> {
 
     @Override
     public int update(Patient entity) {
-        return 0;
+        runInTransaction(session -> {
+            entity.getTherapiesCardList().forEach(session::saveOrUpdate);
+            entity.getTherapists().forEach(session::saveOrUpdate);
+            session.update(entity);
+        });
+        return entity.getId();
     }
 
     @Override
     public int createOrUpdate(Patient entity) {
-        return 0;
+        runInTransaction(session -> {
+            entity.getTherapiesCardList().forEach(session::saveOrUpdate);
+            entity.getTherapists().forEach(session::saveOrUpdate);
+            session.saveOrUpdate(entity);
+        });
+        return entity.getId();
     }
 
     @Override
     public boolean delete(int id) {
-        return false;
+
+        return runInTransaction(session -> {
+            Patient patient = session.get(Patient.class, id);
+            if (patient != null) {
+                patient.getTherapists().forEach(therapist -> therapist
+                        .getPatients()
+                        .remove(patient));
+                patient.getTherapiesCardList().forEach(TherapiesCard::deletePatient);
+                session.delete(patient);
+            }
+        });
     }
 
     @Override
     public boolean deleteAll() {
-        return false;
+        return runInTransaction(session -> {
+            List<Patient> patients = session.createQuery("from Patient", Patient.class).list();
+            patients.forEach(patient -> {
+                patient.getTherapists().forEach(therapist -> therapist
+                        .getPatients()
+                        .remove(patient));
+                patient.getTherapiesCardList().forEach(TherapiesCard::deletePatient);
+                session.delete(patient);
+            });
+        });
     }
 
     protected void setSessionFactoryOnlyForTests(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
-    private void runInTransaction(Consumer<Session> action) {
+    private boolean runInTransaction(Consumer<Session> action) {
+        boolean isSuccessful = false;
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
@@ -72,6 +105,7 @@ public class PatientDao implements CrudAccessible<Patient> {
             action.accept(session);
 
             transaction.commit();
+            isSuccessful = true;
         } catch (RuntimeException e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
@@ -79,5 +113,7 @@ public class PatientDao implements CrudAccessible<Patient> {
         }
 
         session.close();
+        return isSuccessful;
     }
+
 }
