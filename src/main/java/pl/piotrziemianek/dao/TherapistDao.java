@@ -66,13 +66,14 @@ public class TherapistDao implements CrudAccessible<Therapist> {
     public boolean delete(int id) {
         return runInTransaction(session -> {
             Therapist therapist = session.get(Therapist.class, id);
-            if (therapist != null) {
-                therapist.getPatients().forEach(patient -> patient
-                        .getTherapists()
-                        .remove(therapist));
-                therapist.getTherapiesCardList().forEach(TherapiesCard::deleteTherapist);
-                session.delete(therapist);
-            }
+
+            therapist.getPatients().forEach(patient -> patient
+                    .getTherapists()
+                    .remove(therapist));
+            therapist.getTherapiesCardList()
+                    .forEach(TherapiesCard::deleteTherapist);
+            session.delete(therapist);
+
         });
     }
 
@@ -84,7 +85,8 @@ public class TherapistDao implements CrudAccessible<Therapist> {
                 therapist.getPatients().forEach(patient -> patient
                         .getTherapists()
                         .remove(therapist));
-                therapist.getTherapiesCardList().forEach(TherapiesCard::deleteTherapist);
+                therapist.getTherapiesCardList()
+                        .forEach(TherapiesCard::deleteTherapist);
                 session.delete(therapist);
             });
         });

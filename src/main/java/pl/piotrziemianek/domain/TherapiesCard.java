@@ -73,7 +73,7 @@ public class TherapiesCard implements Serializable {
     }
 
     /**
-     * Delete therapist in <i>this</i> TherapiesCard object but not delete <i>this</i> from therapist TherapiesCardList.
+     * Delete therapist in <i>this</i> TherapiesCard object but do not delete <i>this</i> from therapist TherapiesCardList.
      */
     public void deleteTherapist() {
         therapist = null;

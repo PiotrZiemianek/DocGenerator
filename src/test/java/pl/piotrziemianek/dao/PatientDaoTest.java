@@ -2,22 +2,20 @@ package pl.piotrziemianek.dao;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pl.piotrziemianek.configuration.TestUtil;
+import pl.piotrziemianek.util.TestUtil;
 import pl.piotrziemianek.domain.*;
 
 import java.time.LocalDate;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class PatientDaoTest {
     private PatientDao dao;
-    SessionFactory testSessionFactory;
+    private SessionFactory testSessionFactory;
     private TestUtil testUtil = new TestUtil();
 
 
@@ -226,6 +224,10 @@ class PatientDaoTest {
 
         assertThat(delete).isTrue();
         assertThat(deletedPatient).isNull();
+
+        //try to remove a non-existent patient
+        delete = dao.delete(9);
+        assertThat(delete).isFalse();
     }
 
     @Test

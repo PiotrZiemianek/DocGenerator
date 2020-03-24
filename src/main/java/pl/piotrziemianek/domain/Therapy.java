@@ -24,10 +24,10 @@ public class Therapy implements Serializable {
     @Column
     private LocalDate therapyDate;
 
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<Support> supports = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<Subject> subjects = new HashSet<>();
 
     @ManyToOne(cascade = CascadeType.PERSIST)

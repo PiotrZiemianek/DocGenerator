@@ -67,13 +67,13 @@ public class PatientDao implements CrudAccessible<Patient> {
 
         return runInTransaction(session -> {
             Patient patient = session.get(Patient.class, id);
-            if (patient != null) {
-                patient.getTherapists().forEach(therapist -> therapist
-                        .getPatients()
-                        .remove(patient));
-                patient.getTherapiesCardList().forEach(TherapiesCard::deletePatient);
-                session.delete(patient);
-            }
+
+            patient.getTherapists().forEach(therapist -> therapist
+                    .getPatients()
+                    .remove(patient));
+            patient.getTherapiesCardList().forEach(TherapiesCard::deletePatient);
+            session.delete(patient);
+
         });
     }
 

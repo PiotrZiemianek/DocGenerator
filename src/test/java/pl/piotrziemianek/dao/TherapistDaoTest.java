@@ -5,7 +5,7 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pl.piotrziemianek.configuration.TestUtil;
+import pl.piotrziemianek.util.TestUtil;
 import pl.piotrziemianek.domain.Patient;
 import pl.piotrziemianek.domain.TherapiesCard;
 import pl.piotrziemianek.domain.Therapist;
@@ -16,12 +16,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class TherapistDaoTest {
 
     private TherapistDao dao;
-    SessionFactory testSessionFactory;
+    private SessionFactory testSessionFactory;
     private TestUtil testUtil = new TestUtil();
 
     @BeforeEach
@@ -241,6 +240,10 @@ class TherapistDaoTest {
 
         assertThat(delete).isTrue();
         assertThat(deletedTherapist).isNull();
+
+        //try to remove a non-existent therapist
+        delete = dao.delete(9);
+        assertThat(delete).isFalse();
     }
 
     @Test

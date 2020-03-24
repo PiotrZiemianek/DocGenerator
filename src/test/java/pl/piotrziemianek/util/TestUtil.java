@@ -1,4 +1,4 @@
-package pl.piotrziemianek.configuration;
+package pl.piotrziemianek.util;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -9,14 +9,7 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import pl.piotrziemianek.domain.*;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
-import java.util.stream.Collectors;
 
 public class TestUtil {
 
@@ -63,7 +56,7 @@ public class TestUtil {
                 .lastName("Maj")
                 .build();
 
-        Therapy therapy1 = new Therapy(LocalDate.now());
+        Therapy therapy1 = new Therapy(LocalDate.of(2020,1,5));
         therapy1.addSubject(new Subject("Dobry temat1"));
         therapy1.addSupport(new Support("Dobre wspomaganie1"));
 
@@ -71,8 +64,11 @@ public class TestUtil {
         therapy2.addSubject(new Subject("Dobry temat2"));
         therapy2.addSupport(new Support("Dobre wspomaganie2"));
 
+        Subject subject3 = new Subject();
+        Support support3 = new Support();
+
         TherapiesCard therapiesCard1 = new TherapiesCard(LocalDate.now());
-        TherapiesCard therapiesCard2 = new TherapiesCard(LocalDate.now());
+        TherapiesCard therapiesCard2 = new TherapiesCard(LocalDate.of(2020,1,1));
 
 
         Session session = sessionFactory.openSession();
@@ -90,6 +86,8 @@ public class TestUtil {
             session.persist(patient3);
             session.persist(patient4);
             session.persist(patient5);
+            session.persist(subject3);
+            session.persist(support3);
 
             patient5.addTherapist(therapist2);
             therapiesCard2.addTherapy(therapy2);
