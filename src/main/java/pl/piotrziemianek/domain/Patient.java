@@ -73,4 +73,9 @@ public class Patient implements Serializable {
         result = 31 * result + lastName.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return firstName + " " + lastName;
+    }
 }

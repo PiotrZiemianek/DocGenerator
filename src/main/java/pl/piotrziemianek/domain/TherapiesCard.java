@@ -117,4 +117,8 @@ public class TherapiesCard implements Serializable {
         result = 31 * result + (yearMonth != null ? yearMonth.hashCode() : 0);
         return result;
     }
+
+    public String getYearMonthString(){
+        return YearMonth.from(yearMonth).toString();
+    }
 }

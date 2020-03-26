@@ -5,10 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -25,10 +22,10 @@ public class Therapy implements Serializable {
     private LocalDate therapyDate;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    private Set<Support> supports = new HashSet<>();
+    private Set<Support> supports = new LinkedHashSet<>();
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    private Set<Subject> subjects = new HashSet<>();
+    private Set<Subject> subjects = new LinkedHashSet<>();
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "therapiesCard_id")

@@ -81,4 +81,9 @@ public class Therapist implements Serializable {
         result = 31 * result + lastName.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return academicDegree + " " + firstName + " " + lastName;
+    }
 }
