@@ -84,6 +84,10 @@ public class Therapist implements Serializable {
 
     @Override
     public String toString() {
-        return academicDegree + " " + firstName + " " + lastName;
+        if (academicDegree == null) {
+            return firstName + " " + lastName;
+        } else {
+            return academicDegree + " " + firstName + " " + lastName;
+        }
     }
 }

@@ -34,11 +34,14 @@ public class TherapistDao implements CrudAccessible<Therapist> {
 
     @Override
     public int create(Therapist entity) {
-        runInTransaction(session -> {
+        boolean isSuccessful = runInTransaction(session -> {
             entity.getTherapiesCardList().forEach(session::saveOrUpdate);
             entity.getPatients().forEach(session::saveOrUpdate);
             session.save(entity);
         });
+        if (!isSuccessful){
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 

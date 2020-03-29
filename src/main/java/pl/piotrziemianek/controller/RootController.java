@@ -11,7 +11,7 @@ import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
-public class FXController {
+public class RootController {
 
     @FXML
     private Button button;
