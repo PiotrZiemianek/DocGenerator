@@ -1,19 +1,15 @@
 package pl.piotrziemianek;
 
-import org.apache.xmlbeans.XmlException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import pl.piotrziemianek.dao.TherapiesCardDao;
 import pl.piotrziemianek.domain.*;
-import pl.piotrziemianek.service.DocCreator;
 import pl.piotrziemianek.util.HibernateUtil;
 
-import java.io.IOException;
 import java.time.LocalDate;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
       fillDB(HibernateUtil.getSessionFactory());
     }
     public static void fillDB(SessionFactory sessionFactory) {

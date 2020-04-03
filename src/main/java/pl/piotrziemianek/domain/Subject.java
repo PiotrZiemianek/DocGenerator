@@ -21,4 +21,8 @@ public class Subject implements Serializable {
     @Column
     private String subject;
 
+    @Override
+    public String toString() {
+        return subject;
+    }
 }

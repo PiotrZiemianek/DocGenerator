@@ -47,11 +47,14 @@ public class PatientDao implements CrudAccessible<Patient> {
 
     @Override
     public int update(Patient entity) {
-        runInTransaction(session -> {
+        boolean isSuccessful = runInTransaction(session -> {
             entity.getTherapiesCardList().forEach(session::saveOrUpdate);
             entity.getTherapists().forEach(session::saveOrUpdate);
             session.update(entity);
         });
+        if (!isSuccessful){
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 

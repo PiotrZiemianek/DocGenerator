@@ -30,7 +30,7 @@ public class DocGenerator extends Application {
 
 //    @Override
 //    public void stop() {
-//        RootController controller = mainFxmlLoader.getController();
+//        MainViewController controller = mainFxmlLoader.getController();
 //        //ex. save data to db
 //    }
 

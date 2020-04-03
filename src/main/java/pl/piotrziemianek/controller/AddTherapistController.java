@@ -23,8 +23,7 @@ public class AddTherapistController {
     @FXML
     private Button addButton;
 
-    TherapistDao therapistDao = new TherapistDao();
-
+    private TherapistDao therapistDao = new TherapistDao();
 
     public void initialize() {
         setTextFieldListener(therapistNameTF, therapistSurnameTF);
@@ -33,15 +32,16 @@ public class AddTherapistController {
 
         addButton.setDisable(true);
         addButton.setOnAction(event -> {
+            SelectionWindowController selectionWindowController = FXMLLoaderContainer.getSelectionWindowLoader().getController();
             Therapist therapist = createTherapist();
             int therapistId = therapistDao.create(therapist);
-            TherapistController therapistController = FXMLLoaderContainer.getSelectionWindowLoader().getController();
-            ComboBox<Therapist> therapistsBox = therapistController.getTherapistsBox();
+            ComboBox<Therapist> therapistsBox = selectionWindowController.getTherapistsBox();
             if (therapistId != -1) {
                 therapistsBox.getItems().add(therapist);
                 therapistsBox.getSelectionModel().select(therapist);
             }
             Stage window = (Stage) addButton.getScene().getWindow();
+//            cleanup();
             window.close();
         });
     }
@@ -67,6 +67,12 @@ public class AddTherapistController {
                 .firstName(therapistNameTF.getText())
                 .lastName(therapistSurnameTF.getText())
                 .build();
+    }
+
+    protected void cleanup(){
+        therapistNameTF.clear();
+        therapistSurnameTF.clear();
+        academicDegreeTF.clear();
     }
 
 }

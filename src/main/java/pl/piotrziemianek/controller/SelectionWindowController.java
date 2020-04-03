@@ -19,8 +19,14 @@ import pl.piotrziemianek.service.FXMLLoaderContainer;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
-public class TherapistController {
+import static javafx.scene.control.Alert.*;
+import static javafx.scene.control.ButtonBar.*;
+
+public class SelectionWindowController {
     @FXML
     private Button delTherapistButton;
 
@@ -60,15 +66,29 @@ public class TherapistController {
 
     private Scene addTherapistScene = new Scene(addTherapist);
 
-    private Parent main;
+    private Parent addPatient;
 
     {
         try {
-            main = FXMLLoaderContainer.getMainWindowLoader().load();
+            addPatient = FXMLLoaderContainer.getAddPatientPopupLoader().load();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private Scene addPatientScene = new Scene(addPatient);
+
+    private Parent main;
+
+    {
+        try {
+            main = FXMLLoaderContainer.getMainViewLoader().load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Scene mainScene = new Scene(main);
 
     //other
     private String pattern = "dd.MM.yyyy";
@@ -79,17 +99,30 @@ public class TherapistController {
 
     public void initialize() {
 
-        newTherapistButton.setOnAction(e -> {
-            showNewWindow(newTherapistButton.getScene().getWindow(), addTherapistScene, "Dodaj terapeutę");
+        nextStageButton.setOnAction(event -> {
+            Stage newWindow = new Stage();
+
+            newWindow.setTitle("DocGenerator");
+            newWindow.setScene(mainScene);
+
+            newWindow.setResizable(false);
+
+            Stage thisWindow = (Stage) nextStageButton.getScene().getWindow();
+            thisWindow.close();
+
+            MainViewController mainViewController = FXMLLoaderContainer.getMainViewLoader().getController();
+            mainViewController.setup(therapistsBox.getSelectionModel().getSelectedItem(),
+                    patientsBox.getSelectionModel().getSelectedItem(), dateList.getItems());
+            newWindow.show();
         });
 
         setDelTherapistButton();
 
-        newPatientButton.setDisable(true);
+        setNewTherapistButton();
 
-        delPatientButton.setDisable(true);
+        setDelPatientButton();
 
-        newPatientButton.setDisable(true);
+        setNewPatientButton();
 
         setTherapistsBox();
 
@@ -100,14 +133,87 @@ public class TherapistController {
         setDateList();
     }
 
+    private void setNewTherapistButton() {
+        newTherapistButton.setOnAction(e -> {
+            AddTherapistController addTherapistController = FXMLLoaderContainer.getAddTherapistPopupLoader().getController();
+            addTherapistController.cleanup();
+            showNewWindow(newTherapistButton.getScene().getWindow(), addTherapistScene, "Dodaj terapeutę");
+        });
+    }
+
+    private void setNewPatientButton() {
+        newPatientButton.setOnAction(e -> {
+            AddPatientController addPatientController = FXMLLoaderContainer.getAddPatientPopupLoader().getController();
+            addPatientController.setup(therapistsBox.getSelectionModel().getSelectedItem());
+            showNewWindow(newPatientButton.getScene().getWindow(), addPatientScene, "Dodaj pacjenta");
+        });
+        newPatientButton.setDisable(true);
+    }
+
+    private void setDelPatientButton() {
+        delPatientButton.setDisable(true);
+        delPatientButton.setOnAction(event -> {
+            List<String> choices = Arrays.asList("Wypisz od terapeuty", "Usuń z systemu");
+            ChoiceDialog<String> dialog = new ChoiceDialog<>("Wypisz od terapeuty", choices);
+            dialog.getDialogPane().setMaxWidth(250);
+            dialog.setTitle("Usuń pacjenta");
+            dialog.setHeaderText("Usunąć pacjenta?");
+            dialog.setContentText("Co zrobić?");
+
+            ((Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL)).setText("Anuluj");
+
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(s -> {
+                Patient patient = patientsBox.getSelectionModel().getSelectedItem();
+                Therapist therapist = therapistsBox.getSelectionModel().getSelectedItem();
+
+                if (s.equals("Wypisz od terapeuty")) {
+                    patient.removeTherapist(therapist);
+                    int patientId = patientDao.update(patient);
+                    if (patientId != -1) {
+                        patientsBox.getItems().clear();
+                        patientsBox.getItems().addAll(therapist.getPatients());
+                    } else {
+                        patient.addTherapist(therapist);
+                    }
+                } else {
+                    boolean deleted = patientDao.delete(patient.getId());
+                    if (deleted) {
+                        patient.getTherapists().forEach(t -> t
+                                .getPatients()
+                                .remove(patient)); //todo refactor - maybe overload PatientDao.delete method.
+                        patientsBox.getItems().clear();
+                        patientsBox.getItems().addAll(therapist.getPatients());
+                    }
+                }
+            });
+        });
+    }
+
     private void setDelTherapistButton() {
         delTherapistButton.setDisable(true);
         delTherapistButton.setOnAction(event -> {
             Therapist selectedItem = therapistsBox.getSelectionModel().getSelectedItem();
-            boolean deleted = therapistDao.delete(selectedItem.getId());
-            if (deleted) {
-                therapistsBox.getItems().remove(selectedItem);
+
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.getDialogPane().setMaxWidth(250);
+            alert.setTitle("Usuń terapeutę");
+            alert.setHeaderText("Usunąć terapeutę?");
+            alert.setContentText("Terapeuta zostanie usunięty z systemu.");
+
+            ButtonType yesButton = new ButtonType("Tak", ButtonData.NEXT_FORWARD);
+            ButtonType noButton = new ButtonType("Nie", ButtonData.CANCEL_CLOSE);
+
+            alert.getButtonTypes().setAll(yesButton, noButton);
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == yesButton) {
+                boolean deleted = therapistDao.delete(selectedItem.getId());
+                if (deleted) {
+                    therapistsBox.getItems().remove(selectedItem);
+                }
             }
+
         });
     }
 
@@ -126,10 +232,6 @@ public class TherapistController {
         // Specifies the owner Window (parent) for new window
         newWindow.initOwner(primaryStage);
         newWindow.setResizable(false);
-
-        // Set position of second window, related to primary window.
-//        newWindow.setX(primaryStage.getX() + 200);
-//        newWindow.setY(primaryStage.getY() + 100);
 
         newWindow.show();
     }
@@ -151,13 +253,13 @@ public class TherapistController {
                 patientsBox.setDisable(true);
                 patientsBox.getItems().clear();
             }
-           setDisableForNextStageButton();
+            setDisableForNextStageButton();
         });
     }
 
     private void setPatientsBox() {
         patientsBox.setDisable(true);
-        patientsBox.getItems().addAll(patientDao.findAll());
+//        patientsBox.getItems().addAll(patientDao.findAll());
         patientsBox.setPromptText("Wybierz pacjenta");
         patientsBox.setOnAction(event -> {
             Patient selectedItem = patientsBox.getSelectionModel().getSelectedItem();
@@ -258,7 +360,11 @@ public class TherapistController {
         }
     }
 
-    public ComboBox<Therapist> getTherapistsBox() {
+    protected ComboBox<Therapist> getTherapistsBox() {
         return therapistsBox;
+    }
+
+    protected ComboBox<Patient> getPatientsBox() {
+        return patientsBox;
     }
 }

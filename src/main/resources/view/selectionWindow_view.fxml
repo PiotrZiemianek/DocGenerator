@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane prefHeight="353.0" prefWidth="221.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.piotrziemianek.controller.TherapistController">
+<StackPane prefHeight="353.0" prefWidth="221.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.piotrziemianek.controller.SelectionWindowController">
    <children>
       <VBox StackPane.alignment="CENTER">
          <children>

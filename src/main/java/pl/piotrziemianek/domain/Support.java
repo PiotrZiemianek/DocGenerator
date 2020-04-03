@@ -21,4 +21,9 @@ public class Support implements Serializable {
 
     @Column
     private String support;
+
+    @Override
+    public String toString() {
+        return support;
+    }
 }

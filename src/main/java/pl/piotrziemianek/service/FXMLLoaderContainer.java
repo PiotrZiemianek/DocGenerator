@@ -6,10 +6,13 @@ public class FXMLLoaderContainer {
     private static FXMLLoader addTherapistPopupLoader = new FXMLLoader(FXMLLoaderContainer.class
             .getResource("/view/addTherapistPopup_view.fxml"));
 
-    private static FXMLLoader selectionWindowLoader = new FXMLLoader(FXMLLoaderContainer.class
-            .getResource("/view/therapist_view.fxml"));
+ private static FXMLLoader addPatientPopupLoader = new FXMLLoader(FXMLLoaderContainer.class
+            .getResource("/view/addPatientPopup_view.fxml"));
 
-    private static FXMLLoader mainWindowLoader = new FXMLLoader(FXMLLoaderContainer.class
+    private static FXMLLoader selectionWindowLoader = new FXMLLoader(FXMLLoaderContainer.class
+            .getResource("/view/selectionWindow_view.fxml"));
+
+    private static FXMLLoader mainViewLoader = new FXMLLoader(FXMLLoaderContainer.class
             .getResource("/view/main_view.fxml"));
 
     public static FXMLLoader getSelectionWindowLoader() {
@@ -20,7 +23,11 @@ public class FXMLLoaderContainer {
         return addTherapistPopupLoader;
     }
 
-    public static FXMLLoader getMainWindowLoader() {
-        return mainWindowLoader;
+    public static FXMLLoader getMainViewLoader() {
+        return mainViewLoader;
+    }
+
+    public static FXMLLoader getAddPatientPopupLoader() {
+        return addPatientPopupLoader;
     }
 }

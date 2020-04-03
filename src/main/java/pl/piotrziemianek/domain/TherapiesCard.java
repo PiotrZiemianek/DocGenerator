@@ -92,15 +92,6 @@ public class TherapiesCard implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "TherapiesCard{" +
-                "ID= " + id +
-                ", therapist= " + therapist.getFirstName() + therapist.getLastName() +
-                ", patient= " + patient.getFirstName() + therapist.getLastName() +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -118,7 +109,16 @@ public class TherapiesCard implements Serializable {
         return result;
     }
 
-    public String getYearMonthString(){
+    public String getYearMonthString() {
         return YearMonth.from(yearMonth).toString();
+    }
+
+    @Override
+    public String toString() {
+        if (patient != null) {
+            return yearMonth.toString() + " " + patient;
+        } else {
+            return yearMonth.toString();
+        }
     }
 }
