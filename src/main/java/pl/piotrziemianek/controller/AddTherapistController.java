@@ -32,10 +32,10 @@ public class AddTherapistController {
 
         addButton.setDisable(true);
         addButton.setOnAction(event -> {
-            SelectionWindowController selectionWindowController = FXMLLoaderContainer.getSelectionWindowLoader().getController();
+            MainViewController mainViewController = FXMLLoaderContainer.getMainViewLoader().getController();
             Therapist therapist = createTherapist();
             int therapistId = therapistDao.create(therapist);
-            ComboBox<Therapist> therapistsBox = selectionWindowController.getTherapistsBox();
+            ComboBox<Therapist> therapistsBox = mainViewController.getTherapistsBox();
             if (therapistId != -1) {
                 therapistsBox.getItems().add(therapist);
                 therapistsBox.getSelectionModel().select(therapist);

@@ -12,15 +12,15 @@ import java.io.IOException;
 
 public class DocGenerator extends Application {
 
-    private FXMLLoader selectionWindowLoader = FXMLLoaderContainer.getSelectionWindowLoader();
-    private Parent selectionWindow = selectionWindowLoader.load();
+    private FXMLLoader mainViewLoader = FXMLLoaderContainer.getMainViewLoader();
+    private Parent mainView = mainViewLoader.load();
 
     public DocGenerator() throws IOException {
     }
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setScene(new Scene(selectionWindow));
+        primaryStage.setScene(new Scene(mainView));
         primaryStage.setOnCloseRequest(e -> Platform.exit());
         primaryStage.setTitle("DocGenerator");
         primaryStage.setResizable(false);

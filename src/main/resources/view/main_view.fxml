@@ -3,16 +3,17 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitMenuButton?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -22,105 +23,45 @@
 
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="480.0" minWidth="640.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.piotrziemianek.controller.MainViewController">
     <children>
-        <MenuBar prefHeight="10.0" prefWidth="800.0" VBox.vgrow="NEVER">
-            <menus>
-                <Menu mnemonicParsing="false" text="Terapeuta">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Nowy" />
-                        <MenuItem mnemonicParsing="false" text="Zmień" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Pacjent">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Dodaj" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
         <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="458.0" prefWidth="746.0" VBox.vgrow="ALWAYS">
             <children>
-                <VBox alignment="TOP_CENTER" layoutX="220.0" layoutY="14.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="55.0" AnchorPane.leftAnchor="225.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="15.0">
-                    <children>
-                        <Label alignment="CENTER" text="Karta terapii" textAlignment="CENTER" wrapText="true">
-                            <font>
-                                <Font name="System Bold" size="22.0" />
-                            </font>
-                        </Label>
-                        <ScrollPane fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="472.0" prefWidth="560.0">
-                            <content>
-                                <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="453.0" prefWidth="558.0">
-                                    <children>
-                                        <GridPane fx:id="therapiesGP" gridLinesVisible="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="138.0" prefWidth="638.0" VBox.vgrow="ALWAYS">
-                                            <columnConstraints>
-                                                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="70.0" prefWidth="75.0" />
-                                                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="214.39998779296877" />
-                                                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="231.20001220703125" />
-                                            </columnConstraints>
-                                            <rowConstraints>
-                                                <RowConstraints maxHeight="48.800009155273436" minHeight="10.0" prefHeight="44.800009155273436" vgrow="SOMETIMES" />
-                                                <RowConstraints maxHeight="62.60001220703125" minHeight="10.0" prefHeight="50.39998168945312" vgrow="SOMETIMES" />
-                                            </rowConstraints>
-                                            <children>
-                                                <Label text="Data" textAlignment="CENTER" wrapText="true">
-                                                    <GridPane.margin>
-                                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                                    </GridPane.margin>
-                                                </Label>
-                                                <Label text="Przebieg zajęć" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1">
-                                                    <GridPane.margin>
-                                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                                    </GridPane.margin>
-                                                </Label>
-                                                <Label text="Działania wspierające rodzinę" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2">
-                                                    <GridPane.margin>
-                                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                                    </GridPane.margin>
-                                                </Label>
-                                                <Label fx:id="dateLabel" layoutX="15.0" layoutY="21.0" text="Label" GridPane.rowIndex="1">
-                                                    <GridPane.margin>
-                                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                                    </GridPane.margin>
-                                                </Label>
-                                                <ComboBox fx:id="subjectsCB" maxWidth="1.7976931348623157E308" prefHeight="26.0" prefWidth="309.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
-                                                    <GridPane.margin>
-                                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                                    </GridPane.margin>
-                                                </ComboBox>
-                                                <ComboBox fx:id="supportsCB" maxWidth="1.7976931348623157E308" prefHeight="26.0" prefWidth="250.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
-                                                    <GridPane.margin>
-                                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                                    </GridPane.margin>
-                                                </ComboBox>
-                                            </children>
-                                            <padding>
-                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                            </padding>
-                                            <VBox.margin>
-                                                <Insets top="5.0" />
-                                            </VBox.margin>
-                                        </GridPane>
-                                    </children>
-                                </VBox>
-                            </content>
-                        </ScrollPane>
-                    </children>
-                </VBox>
-                <ScrollPane layoutX="20.0" layoutY="357.0" prefHeight="202.0" prefWidth="200.0" AnchorPane.leftAnchor="20.0">
-                    <content>
-                        <ListView fx:id="cardsHistoryLV" prefHeight="200.0" prefWidth="196.0">
-                            <opaqueInsets>
-                                <Insets />
-                            </opaqueInsets>
-                        </ListView>
-                    </content>
-                </ScrollPane>
-                <Label layoutX="22.0" layoutY="341.0" text="Historia kart terapii" />
-                <SplitMenuButton fx:id="generateBut" alignment="CENTER" layoutX="485.0" layoutY="333.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="133.0" text="Generuj (PDF)" textAlignment="CENTER" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="20.0">
-                    <items>
-                        <MenuItem fx:id="pdfMI" mnemonicParsing="false" text="PDF" />
-                        <MenuItem fx:id="docxMI" mnemonicParsing="false" text="DOCX (Word)" />
-                    </items>
-                </SplitMenuButton>
+            <Group fx:id="therapyCardGroup" layoutX="222.0" layoutY="15.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="230.0" AnchorPane.rightAnchor="20.0">
+               <children>
+                      <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                          <children>
+                              <Label alignment="CENTER" prefHeight="18.0" prefWidth="130.0" text="Karta terapii" textAlignment="CENTER" wrapText="true">
+                                  <font>
+                                      <Font name="System Bold" size="22.0" />
+                                  </font>
+                              </Label>
+                              <ScrollPane fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="505.0" prefWidth="560.0">
+                           <content>
+                              <TreeTableView fx:id="therapiesTable" prefHeight="499.0" prefWidth="558.0">
+                                <columns>
+                                  <TreeTableColumn editable="false" prefWidth="75.0" resizable="false" text="Data" />
+                                  <TreeTableColumn editable="false" prefWidth="227.20001220703125" text="Przebieg zajęć" />
+                                    <TreeTableColumn editable="false" prefWidth="253.60003662109375" text="Działania wspierające rodzinę" />
+                                </columns>
+                              </TreeTableView>
+                           </content>
+                              </ScrollPane>
+                          </children>
+                      </VBox>
+                      <SplitMenuButton fx:id="generateBut" alignment="CENTER" layoutX="427.0" layoutY="544.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="133.0" text="Generuj (PDF)" textAlignment="CENTER">
+                          <items>
+                              <MenuItem fx:id="pdfMI" mnemonicParsing="false" text="PDF" />
+                              <MenuItem fx:id="docxMI" mnemonicParsing="false" text="DOCX (Word)" />
+                          </items>
+                      </SplitMenuButton>
+                  <CheckBox fx:id="autoCompleteCB" layoutX="2.0" layoutY="544.0" mnemonicParsing="false" selected="true" text="Autouzupełnianie na podstawie ostatniej terapii" />
+               </children>
+            </Group>
+                  <ListView fx:id="cardsHistoryLV" layoutX="20.0" layoutY="357.0" prefHeight="196.0" prefWidth="200.0" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="20.0">
+                      <opaqueInsets>
+                          <Insets />
+                      </opaqueInsets>
+                  </ListView>
+                <Label layoutX="22.0" layoutY="343.0" text="Historia kart terapii" />
                 <GridPane layoutX="20.0" layoutY="53.0" prefHeight="30.0" prefWidth="200.0" AnchorPane.leftAnchor="20.0">
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="94.39999389648438" minWidth="10.0" prefWidth="44.000006103515624" />
@@ -130,8 +71,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                 </GridPane>
-                <Group layoutX="17.0" layoutY="11.0" />
-                <VBox layoutX="22.0" layoutY="11.0" prefHeight="330.0" prefWidth="200.0">
+                <VBox layoutX="22.0" layoutY="11.0" prefHeight="330.0" prefWidth="200.0" AnchorPane.leftAnchor="20.0">
 
                     <children>
                         <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="200.0">
@@ -185,23 +125,10 @@
                             </VBox.margin>
                         </DatePicker>
                         <ListView fx:id="dateList" prefHeight="200.0" prefWidth="114.0" VBox.vgrow="ALWAYS" />
-                        <GridPane maxWidth="-Infinity" prefHeight="100.0" prefWidth="201.0">
-                            <VBox.margin>
-                                <Insets top="5.0" />
-                            </VBox.margin>
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="153.6" minWidth="10.0" prefWidth="145.6" />
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="70.9999755859375" minWidth="10.0" prefWidth="55.20000000000002" />
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                            </rowConstraints>
-                            <children>
-                                <Button fx:id="nextStageButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="81.0" text="Dalej &gt;" textAlignment="CENTER" GridPane.columnIndex="1" />
-                            </children>
-                        </GridPane>
+                  <Button fx:id="createTherapiesCard" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="315.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="200.0" text="Utwórz kartę terapii" textAlignment="CENTER" />
                     </children>
                 </VBox>
+                    <Button fx:id="openCardFromHistoryBut" alignment="CENTER" contentDisplay="CENTER" layoutX="20.0" layoutY="554.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="200.0" text="Otwórz zaznaczoną" textAlignment="CENTER" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="20.0" />
             </children>
         </AnchorPane>
     </children>

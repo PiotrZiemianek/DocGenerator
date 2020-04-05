@@ -54,14 +54,14 @@ public class AddPatientController {
 
         assignToTherapistButton.setDisable(true);
         assignToTherapistButton.setOnAction(event -> {
-            SelectionWindowController selectionWindowController = FXMLLoaderContainer.getSelectionWindowLoader().getController();
+            MainViewController mainViewController = FXMLLoaderContainer.getMainViewLoader().getController();
             ObservableList<Patient> selectedPatients = availablePatientsLV.getSelectionModel().getSelectedItems();
             selectedPatients.forEach(therapist::addPatient);
             therapistDao.update(therapist);
-            selectionWindowController.getTherapistsBox()
+            mainViewController.getTherapistsBox()
                     .setItems(FXCollections.observableArrayList(therapistDao.findAll()));
-            selectionWindowController.getTherapistsBox().getSelectionModel().select(therapist);
-//            selectionWindowController.getPatientsBox()
+            mainViewController.getTherapistsBox().getSelectionModel().select(therapist);
+//            mainViewController.getPatientsBox()
 //                    .setItems(FXCollections.observableArrayList(therapist.getPatients())); //it does when therapist is selected
             Stage window = (Stage) addButton.getScene().getWindow();
             window.close();
@@ -76,8 +76,8 @@ public class AddPatientController {
             Patient patient = createPatient();
             patient.addTherapist(therapist);
             int patientId = patientDao.create(patient);
-            SelectionWindowController selectionWindowController = FXMLLoaderContainer.getSelectionWindowLoader().getController();
-            ComboBox<Patient> patientsBox = selectionWindowController.getPatientsBox();
+            MainViewController mainViewController = FXMLLoaderContainer.getMainViewLoader().getController();
+            ComboBox<Patient> patientsBox = mainViewController.getPatientsBox();
             if (patientId != -1) {
                 patientsBox.getItems().add(patient);
                 patientsBox.getSelectionModel().select(patient);
