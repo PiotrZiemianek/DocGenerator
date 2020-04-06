@@ -1,14 +1,15 @@
 package pl.piotrziemianek.controller;
 
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -25,17 +26,28 @@ import pl.piotrziemianek.util.AutoCompleteBox;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class MainViewController {
+
+    @FXML
+    private CheckBox autoCompleteCB;
+
 
     @FXML
     private Button openCardFromHistoryBut;
 
     @FXML
-    private TreeTableView<Therapy> therapiesTable;
+    private TableView<Therapy> therapiesTable;
+
+    @FXML
+    private TableColumn<Therapy, LocalDate> therapyDateColl;
+
+    @FXML
+    private TableColumn<Therapy, Set<Subject>> therapySubColl;
+
+    @FXML
+    private TableColumn<Therapy, Set<Support>> therapySupColl;
 
     @FXML
     private ListView<TherapiesCard> cardsHistoryLV;
@@ -115,11 +127,35 @@ public class MainViewController {
     public void initialize() {
         therapyCardGroup.setDisable(true);
 
+        docxMI.setOnAction(event -> {
+            generateBut.setText("Generuj (DOCX)");
+//            generateBut.setOnAction(event1 -> ); //todo
+        });
+        pdfMI.setOnAction(event -> {
+            generateBut.setText("Generuj (PDF)");
+//            generateBut.setOnAction(event1 -> ); //todo
+        });
+
         openCardFromHistoryBut.setDisable(true);
+        openCardFromHistoryBut.setOnAction(event -> {
+            therapyCardGroup.setDisable(false);
+            autoCompleteCB.setVisible(false);
+            setTherapiesTable(cardsHistoryLV.getSelectionModel().getSelectedItem());
+        });
+
+        cardsHistoryLV.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                openCardFromHistoryBut.setDisable(false);
+            } else {
+                openCardFromHistoryBut.setDisable(true);
+            }
+        });
 
         createTherapiesCard.setDisable(true);
         createTherapiesCard.setOnAction(event -> {
             therapyCardGroup.setDisable(false);
+            autoCompleteCB.setVisible(true);
+
             FXCollections.sort(dateList.getItems());
             TherapiesCard therapiesCard = new TherapiesCard();
             therapiesCard.setPatient(patientsBox.getSelectionModel().getSelectedItem());
@@ -132,9 +168,7 @@ public class MainViewController {
                     .orElse(new Therapy())
                     .getTherapyDate());
 
-            TreeTableColumn<Therapy, ?> therapyDatesColumn = therapiesTable.getColumns().get(0);
-            TreeTableColumn<Therapy, ?> therapySubjectsColumn = therapiesTable.getColumns().get(1);
-            TreeTableColumn<Therapy, ?> therapySupportsColumn = therapiesTable.getColumns().get(2);
+            setTherapiesTable(therapiesCard);
         });
 
         setDelTherapistButton();
@@ -152,6 +186,100 @@ public class MainViewController {
         setDatePicker();
 
         setDateList();
+
+    }
+
+    private void setTherapiesTable(TherapiesCard therapiesCard) {
+        therapiesTable.setItems(FXCollections.observableArrayList(therapiesCard.getTherapies()));
+        therapiesTable.setFixedCellSize(100);
+
+        therapyDateColl.setCellValueFactory(new PropertyValueFactory<>("therapyDate"));
+        therapyDateColl.setCellFactory(param -> new TableCell<Therapy, LocalDate>() {
+            @Override
+            public void updateItem(LocalDate localDate, boolean empty) {
+                super.updateItem(localDate, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(localDate.format(dateFormatter));
+                }
+            }
+        });
+
+        therapySubColl.setCellValueFactory(new PropertyValueFactory<>("subjects"));
+        therapySubColl.setCellFactory(col -> {
+            ListView<Subject> listView = getCellListView();
+            return new TableCell<Therapy, Set<Subject>>() {
+                @Override
+                public void updateItem(Set<Subject> subjects, boolean empty) {
+                    super.updateItem(subjects, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        listView.getItems().setAll(subjects);
+                        setGraphic(listView);
+                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                    }
+                }
+            };
+        });
+
+
+        therapySupColl.setCellValueFactory(new PropertyValueFactory<>("supports"));
+        therapySupColl.setCellFactory(col -> {
+            ListView<Support> listView = getCellListView();
+            return new TableCell<Therapy, Set<Support>>() {
+                @Override
+                public void updateItem(Set<Support> supports, boolean empty) {
+                    super.updateItem(supports, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        listView.getItems().setAll(supports);
+                        setGraphic(listView);
+                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                    }
+                }
+            };
+        });
+    }
+
+    private <T> ListView<T> getCellListView() {
+        ListView<T> listView = new ListView<>();
+        listView.setMaxHeight(100);
+        listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent click) {
+
+                if (click.getClickCount() == 2) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.getDialogPane().setMaxWidth(250);
+                    alert.setTitle("Usuń terapeutę");
+                    alert.setHeaderText("Usunąć terapeutę?");
+                    alert.setContentText("Terapeuta zostanie usunięty z systemu.");
+
+                    ButtonType yesButton = new ButtonType("Tak", ButtonBar.ButtonData.NEXT_FORWARD);
+                    ButtonType noButton = new ButtonType("Nie", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(yesButton, noButton);
+
+                    Optional<ButtonType> result = alert.showAndWait(); //todo
+                }
+            }
+        });
+        listView.setCellFactory(lv -> new ListCell<T>() {
+            @Override
+            public void updateItem(T item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(item.toString());
+                }
+            }
+        });
+        return listView;
     }
 
     private void setNewTherapistButton() {

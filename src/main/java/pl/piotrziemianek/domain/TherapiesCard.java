@@ -115,6 +115,7 @@ public class TherapiesCard implements Serializable {
 
     @Override
     public String toString() {
+        YearMonth yearMonth = YearMonth.from(this.yearMonth);
         if (patient != null) {
             return yearMonth.toString() + " " + patient;
         } else {

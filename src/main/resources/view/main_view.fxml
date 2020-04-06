@@ -9,11 +9,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitMenuButton?>
-<?import javafx.scene.control.TreeTableColumn?>
-<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -25,7 +24,7 @@
     <children>
         <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="458.0" prefWidth="746.0" VBox.vgrow="ALWAYS">
             <children>
-            <Group fx:id="therapyCardGroup" layoutX="222.0" layoutY="15.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="230.0" AnchorPane.rightAnchor="20.0">
+            <Group fx:id="therapyCardGroup" layoutX="222.0" layoutY="15.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="230.0" AnchorPane.rightAnchor="20.0">
                <children>
                       <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                           <children>
@@ -34,17 +33,13 @@
                                       <Font name="System Bold" size="22.0" />
                                   </font>
                               </Label>
-                              <ScrollPane fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="505.0" prefWidth="560.0">
-                           <content>
-                              <TreeTableView fx:id="therapiesTable" prefHeight="499.0" prefWidth="558.0">
-                                <columns>
-                                  <TreeTableColumn editable="false" prefWidth="75.0" resizable="false" text="Data" />
-                                  <TreeTableColumn editable="false" prefWidth="227.20001220703125" text="Przebieg zajęć" />
-                                    <TreeTableColumn editable="false" prefWidth="253.60003662109375" text="Działania wspierające rodzinę" />
-                                </columns>
-                              </TreeTableView>
-                           </content>
-                              </ScrollPane>
+                        <TableView fx:id="therapiesTable" blendMode="SRC_ATOP" prefHeight="502.0" prefWidth="560.0">
+                          <columns>
+                            <TableColumn fx:id="therapyDateColl" prefWidth="75.0" resizable="false" text="Data" />
+                            <TableColumn fx:id="therapySubColl" prefWidth="239.20001220703125" text="Temat" />
+                              <TableColumn fx:id="therapySupColl" prefWidth="242.39996337890625" text="Wspomaganie" />
+                          </columns>
+                        </TableView>
                           </children>
                       </VBox>
                       <SplitMenuButton fx:id="generateBut" alignment="CENTER" layoutX="427.0" layoutY="544.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="133.0" text="Generuj (PDF)" textAlignment="CENTER">
@@ -53,7 +48,7 @@
                               <MenuItem fx:id="docxMI" mnemonicParsing="false" text="DOCX (Word)" />
                           </items>
                       </SplitMenuButton>
-                  <CheckBox fx:id="autoCompleteCB" layoutX="2.0" layoutY="544.0" mnemonicParsing="false" selected="true" text="Autouzupełnianie na podstawie ostatniej terapii" />
+                  <CheckBox fx:id="autoCompleteCB" layoutX="2.0" layoutY="544.0" mnemonicParsing="false" selected="true" text="Autouzupełnianie na podstawie wskazanej karty z historii" />
                </children>
             </Group>
                   <ListView fx:id="cardsHistoryLV" layoutX="20.0" layoutY="357.0" prefHeight="196.0" prefWidth="200.0" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="20.0">
