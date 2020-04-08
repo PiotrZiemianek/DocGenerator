@@ -3,6 +3,7 @@ package pl.piotrziemianek.controller;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -10,23 +11,27 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import pl.piotrziemianek.dao.PatientDao;
-import pl.piotrziemianek.dao.SubjectDao;
-import pl.piotrziemianek.dao.SupportDao;
-import pl.piotrziemianek.dao.TherapistDao;
+import pl.piotrziemianek.dao.*;
 import pl.piotrziemianek.domain.*;
-import pl.piotrziemianek.service.FXMLLoaderContainer;
+import pl.piotrziemianek.util.FXMLLoaderContainer;
 import pl.piotrziemianek.util.AutoCompleteBox;
+import pl.piotrziemianek.util.PreTCard;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.BiConsumer;
+
+import static javafx.scene.control.Alert.*;
+import static javafx.scene.control.ButtonBar.*;
 
 public class MainViewController {
 
@@ -123,6 +128,7 @@ public class MainViewController {
     private PatientDao patientDao = new PatientDao();
     private SubjectDao subjectDao = new SubjectDao();
     private SupportDao supportDao = new SupportDao();
+    private PreTCard preTCard;
 
     public void initialize() {
         therapyCardGroup.setDisable(true);
@@ -136,12 +142,7 @@ public class MainViewController {
 //            generateBut.setOnAction(event1 -> ); //todo
         });
 
-        openCardFromHistoryBut.setDisable(true);
-        openCardFromHistoryBut.setOnAction(event -> {
-            therapyCardGroup.setDisable(false);
-            autoCompleteCB.setVisible(false);
-            setTherapiesTable(cardsHistoryLV.getSelectionModel().getSelectedItem());
-        });
+        setupOpenCardFromHistoryBut();
 
         cardsHistoryLV.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -151,6 +152,36 @@ public class MainViewController {
             }
         });
 
+        setupCreateTherapiesCardBut();
+
+        setupDelTherapistButton();
+
+        setupNewTherapistButton();
+
+        setupDelPatientButton();
+
+        setupNewPatientButton();
+
+        setupTherapistsBox();
+
+        setupPatientsBox();
+
+        setupDatePicker();
+
+        setupDateList();
+
+    }
+
+    private void setupOpenCardFromHistoryBut() {
+        openCardFromHistoryBut.setDisable(true);
+        openCardFromHistoryBut.setOnAction(event -> {
+            therapyCardGroup.setDisable(false);
+            autoCompleteCB.setVisible(false);
+            setTherapiesTable(cardsHistoryLV.getSelectionModel().getSelectedItem());
+        });
+    }
+
+    private void setupCreateTherapiesCardBut() {
         createTherapiesCard.setDisable(true);
         createTherapiesCard.setOnAction(event -> {
             therapyCardGroup.setDisable(false);
@@ -158,8 +189,8 @@ public class MainViewController {
 
             FXCollections.sort(dateList.getItems());
             TherapiesCard therapiesCard = new TherapiesCard();
-            therapiesCard.setPatient(patientsBox.getSelectionModel().getSelectedItem());
-            therapiesCard.setTherapist(therapistsBox.getSelectionModel().getSelectedItem());
+            Patient patient = patientsBox.getSelectionModel().getSelectedItem();
+            Therapist therapist = therapistsBox.getSelectionModel().getSelectedItem();
             for (LocalDate therapyDate : dateList.getItems()) {
                 therapiesCard.addTherapy(new Therapy(therapyDate));
             }
@@ -168,25 +199,10 @@ public class MainViewController {
                     .orElse(new Therapy())
                     .getTherapyDate());
 
+            preTCard = new PreTCard(therapist, patient, therapiesCard);
+
             setTherapiesTable(therapiesCard);
         });
-
-        setDelTherapistButton();
-
-        setNewTherapistButton();
-
-        setDelPatientButton();
-
-        setNewPatientButton();
-
-        setTherapistsBox();
-
-        setPatientsBox();
-
-        setDatePicker();
-
-        setDateList();
-
     }
 
     private void setTherapiesTable(TherapiesCard therapiesCard) {
@@ -209,65 +225,250 @@ public class MainViewController {
         therapySubColl.setCellValueFactory(new PropertyValueFactory<>("subjects"));
         therapySubColl.setCellFactory(col -> {
             ListView<Subject> listView = getCellListView();
-            return new TableCell<Therapy, Set<Subject>>() {
-                @Override
-                public void updateItem(Set<Subject> subjects, boolean empty) {
-                    super.updateItem(subjects, empty);
-                    if (empty) {
-                        setGraphic(null);
-                    } else {
-                        listView.getItems().setAll(subjects);
-                        setGraphic(listView);
-                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-                    }
-                }
-            };
+            setLVEditableOnMouseDoubleClick(listView, subjectDao, this::setupNewDelSubject);
+            return getTableCellAsListView(listView);
         });
 
 
         therapySupColl.setCellValueFactory(new PropertyValueFactory<>("supports"));
         therapySupColl.setCellFactory(col -> {
             ListView<Support> listView = getCellListView();
-            return new TableCell<Therapy, Set<Support>>() {
-                @Override
-                public void updateItem(Set<Support> supports, boolean empty) {
-                    super.updateItem(supports, empty);
-                    if (empty) {
-                        setGraphic(null);
-                    } else {
-                        listView.getItems().setAll(supports);
-                        setGraphic(listView);
-                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-                    }
-                }
-            };
+            setLVEditableOnMouseDoubleClick(listView, supportDao, this::setupNewDelSupport);
+            return getTableCellAsListView(listView);
         });
     }
 
-    private <T> ListView<T> getCellListView() {
-        ListView<T> listView = new ListView<>();
-        listView.setMaxHeight(100);
+    private <T> TableCell<Therapy, Set<T>> getTableCellAsListView(ListView<T> listView) {
+        return new TableCell<Therapy, Set<T>>() {
+            @Override
+            public void updateItem(Set<T> items, boolean empty) {
+                super.updateItem(items, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    listView.getItems().setAll(items);
+                    setGraphic(listView);
+                    setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                }
+            }
+        };
+    }
+
+    private <T> void setLVEditableOnMouseDoubleClick(ListView<T> listView, CrudAccessible<T> dao, BiConsumer<Button[], ListView<T>> setupNewDelButtons) { //todo new Button?
         listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
             @Override
             public void handle(MouseEvent click) {
 
-                if (click.getClickCount() == 2) {
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.getDialogPane().setMaxWidth(250);
-                    alert.setTitle("Usuń terapeutę");
-                    alert.setHeaderText("Usunąć terapeutę?");
-                    alert.setContentText("Terapeuta zostanie usunięty z systemu.");
+                if (click.getClickCount() == 2 && autoCompleteCB.isVisible()) {
+                    Dialog<List<T>> dialog = new Dialog<>();
+                    dialog.setTitle("Dodaj lub usuń");
+                    dialog.setHeaderText(null);
 
-                    ButtonType yesButton = new ButtonType("Tak", ButtonBar.ButtonData.NEXT_FORWARD);
-                    ButtonType noButton = new ButtonType("Nie", ButtonBar.ButtonData.CANCEL_CLOSE);
+                    ButtonType okButtonType = new ButtonType("Zatwierdź", ButtonData.OK_DONE);
+                    ButtonType cancelButtonType = new ButtonType("Anuluj", ButtonData.CANCEL_CLOSE);
 
-                    alert.getButtonTypes().setAll(yesButton, noButton);
 
-                    Optional<ButtonType> result = alert.showAndWait(); //todo
+                    dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
+
+                    GridPane grid = new GridPane();
+                    grid.setHgap(10);
+                    grid.setVgap(10);
+                    grid.setPadding(new Insets(10, 10, 10, 10));
+
+
+                    ListView<T> allItemsList = new ListView<>();
+                    allItemsList.getItems().setAll(dao.findAll());
+                    setupMultipleSelectionModelOnMouseClickWithoutCtrl(allItemsList);
+                    MultipleSelectionModel<T> selectionModel = allItemsList.getSelectionModel();
+
+                    listView.getItems().stream()
+                            .filter(t -> allItemsList.getItems().contains(t))
+                            .forEach(selectionModel::select);
+
+                    GridPane innerGrid = new GridPane();
+
+                    Button newItemBut = new Button("Nowy");
+                    Button delItemBut = new Button("Usuń");
+                    setupNewDelButtons.accept(new Button[]{newItemBut, delItemBut}, allItemsList);
+
+                    innerGrid.add(newItemBut, 0, 0);
+                    innerGrid.add(delItemBut, 1, 0);
+
+                    grid.add(innerGrid, 0, 0);
+                    grid.add(allItemsList, 0, 1);
+
+                    dialog.getDialogPane().setContent(grid);
+
+                    dialog.setResultConverter(dialogButton -> {
+                        if (dialogButton == okButtonType) {
+                            return selectionModel.getSelectedItems();
+                        }
+                        return null;
+                    });
+                    Optional<List<T>> result = dialog.showAndWait();
+
+                    if (result.isPresent()) {
+                        listView.getItems().setAll(result.get());
+                    } else {
+                        listView.getItems().clear();
+                    }
                 }
             }
+
+            private void setupMultipleSelectionModelOnMouseClickWithoutCtrl(ListView<T> allItemsList) {
+                MultipleSelectionModel<T> selectionModel = allItemsList.getSelectionModel();
+                selectionModel.setSelectionMode(SelectionMode.MULTIPLE);
+                allItemsList.setCellFactory(lv -> {
+                    ListCell<T> cell = new ListCell<>();
+
+                    cell.itemProperty().addListener((observable, oldValue, newValue) -> {
+                        if (oldValue != null) {
+                            cell.textProperty().unbind();
+                        }
+                        if (newValue == null) {
+                            cell.textProperty().unbind();
+                        } else {
+                            cell.textProperty().bind(cell.itemProperty().asString());
+                        }
+                    });
+
+                    cell.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+                        allItemsList.requestFocus();
+                        if (!cell.isEmpty()) {
+                            int index = cell.getIndex();
+                            if (selectionModel.getSelectedIndices().contains(index)) {
+                                selectionModel.clearSelection(index);
+                            } else {
+                                selectionModel.select(index);
+                            }
+                            event.consume();
+                        }
+                    });
+                    return cell;
+                });
+            }
         });
+    }
+
+    private void setupNewDelSupport(Button[] newDelButtons, ListView listView) {
+        Button newButton = newDelButtons[0];
+        Button delButton = newDelButtons[1];
+        newButton.setOnAction(event -> {
+            TextInputDialog newItemDial = new TextInputDialog();
+            newItemDial.setTitle("Wrowadź nowe wspomaganie");
+            newItemDial.setHeaderText("Wprowadź nowe wspomaganie");
+            newItemDial.setContentText(null);
+
+            Optional<String> result = newItemDial.showAndWait();
+            result.ifPresent(s -> {
+                String sup = result.get();
+                if (!sup.isBlank()) {
+                    Support support = new Support(sup);
+                    int i = supportDao.create(support);
+
+                    if (i != -1) {
+                        ((ListView<Support>) listView).getItems().add(support);
+                    } else {
+                        saveFailedAlert("Upewnij się czy nie istnieje już takie wspomaganie w systemie.");
+                    }
+                } else {
+                    saveFailedAlert("Wprowadź treść wspomagania przed zapisem");
+                }
+            });
+        });
+        delButton.setOnAction(event -> {
+            ChoiceDialog<Support> delCB = new ChoiceDialog<>();
+            delCB.getItems().setAll(((ListView<Support>) listView).getItems());
+            delCB.setTitle("Usuwanie");
+            delCB.setHeaderText("Które wspomaganie usunąć?");
+            delCB.setContentText(null);
+
+            Optional<Support> result = delCB.showAndWait();
+
+            result.ifPresent(support -> {
+                boolean delete = supportDao.delete(support.getId());
+                if (delete) {
+                    listView.getItems().remove(support);
+                } else {
+                    deleteFailedAlert("Z tego wspomagania korzystają inne karty terapii.");
+                }
+            });
+        });
+    }
+
+    private void setupNewDelSubject(Button[] newDelButtons, ListView listView) {
+        Button newButton = newDelButtons[0];
+        Button delButton = newDelButtons[1];
+        newButton.setOnAction(event -> {
+            TextInputDialog newItemDial = new TextInputDialog();
+            newItemDial.setTitle("Wrowadź nowy temat zajęć");
+            newItemDial.setHeaderText("Wrowadź nowy temat zajęć");
+            newItemDial.setContentText(null);
+
+            Optional<String> result = newItemDial.showAndWait();
+            result.ifPresent(s -> {
+                String sup = result.get();
+                if (!sup.isBlank()) {
+                    Subject subject = new Subject(sup);
+                    int i = subjectDao.create(subject);
+
+                    if (i != -1) {
+                        ((ListView<Subject>) listView).getItems().add(subject);
+                    } else {
+                        saveFailedAlert("Upewnij się czy nie istnieje już taki temat zajęć w systemie.");
+                    }
+                } else {
+                    saveFailedAlert("Wprowadź treść tematu zajęć przed zapisem");
+                }
+            });
+        });
+        delButton.setOnAction(event -> {
+            ChoiceDialog<Subject> delCB = new ChoiceDialog<>();
+            delCB.getItems().setAll(((ListView<Subject>) listView).getItems());
+            delCB.setTitle("Usuwanie");
+            delCB.setHeaderText("Który temat zajęć usunąć?");
+            delCB.setContentText(null);
+
+            Optional<Subject> result = delCB.showAndWait();
+
+            result.ifPresent(subject -> {
+                boolean delete = subjectDao.delete(subject.getId());
+                if (delete) {
+                    listView.getItems().remove(subject);
+                } else {
+                    deleteFailedAlert("Nie można usunąć tematu zajęć z którego korzystają jakieś karty terapii.");
+                }
+            });
+        });
+    }
+
+    private void deleteFailedAlert(String content) {
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle("Nie można usunąć");
+        alert.setHeaderText("Usuwanie nie powiodło się");
+        Text text = new Text(content);
+        text.setWrappingWidth(50);
+        alert.getDialogPane().setContent(text);
+
+        alert.showAndWait();
+    }
+
+    private void saveFailedAlert(String content) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle("Błąd zapisu");
+        alert.setHeaderText("Nie zapisano");
+        Text text = new Text(content);
+        text.setWrappingWidth(50);
+        alert.getDialogPane().setContent(text);
+
+        alert.showAndWait();
+    }
+
+    private <T> ListView<T> getCellListView() {
+        ListView<T> listView = new ListView<>();
+        listView.setMaxHeight(100);
+
         listView.setCellFactory(lv -> new ListCell<T>() {
             @Override
             public void updateItem(T item, boolean empty) {
@@ -282,7 +483,7 @@ public class MainViewController {
         return listView;
     }
 
-    private void setNewTherapistButton() {
+    private void setupNewTherapistButton() {
         newTherapistButton.setOnAction(e -> {
             AddTherapistController addTherapistController = FXMLLoaderContainer.getAddTherapistPopupLoader().getController();
             addTherapistController.cleanup();
@@ -290,7 +491,7 @@ public class MainViewController {
         });
     }
 
-    private void setNewPatientButton() {
+    private void setupNewPatientButton() {
         newPatientButton.setOnAction(e -> {
             AddPatientController addPatientController = FXMLLoaderContainer.getAddPatientPopupLoader().getController();
             addPatientController.setup(therapistsBox.getSelectionModel().getSelectedItem());
@@ -299,7 +500,7 @@ public class MainViewController {
         newPatientButton.setDisable(true);
     }
 
-    private void setDelPatientButton() {
+    private void setupDelPatientButton() {
         delPatientButton.setDisable(true);
         delPatientButton.setOnAction(event -> {
             List<String> choices = Arrays.asList("Wypisz od terapeuty", "Usuń z systemu");
@@ -339,19 +540,19 @@ public class MainViewController {
         });
     }
 
-    private void setDelTherapistButton() {
+    private void setupDelTherapistButton() {
         delTherapistButton.setDisable(true);
         delTherapistButton.setOnAction(event -> {
             Therapist selectedItem = therapistsBox.getSelectionModel().getSelectedItem();
 
-            Alert alert = new Alert(Alert.AlertType.WARNING);
+            Alert alert = new Alert(AlertType.WARNING);
             alert.getDialogPane().setMaxWidth(250);
             alert.setTitle("Usuń terapeutę");
             alert.setHeaderText("Usunąć terapeutę?");
             alert.setContentText("Terapeuta zostanie usunięty z systemu.");
 
-            ButtonType yesButton = new ButtonType("Tak", ButtonBar.ButtonData.NEXT_FORWARD);
-            ButtonType noButton = new ButtonType("Nie", ButtonBar.ButtonData.CANCEL_CLOSE);
+            ButtonType yesButton = new ButtonType("Tak", ButtonData.NEXT_FORWARD);
+            ButtonType noButton = new ButtonType("Nie", ButtonData.CANCEL_CLOSE);
 
             alert.getButtonTypes().setAll(yesButton, noButton);
 
@@ -385,7 +586,7 @@ public class MainViewController {
         newWindow.show();
     }
 
-    private void setTherapistsBox() {
+    private void setupTherapistsBox() {
         therapistsBox.getItems().addAll(therapistDao.findAll());
         therapistsBox.setPromptText("Wybierz terapeutę");
         therapistsBox.setOnAction(event -> {
@@ -407,7 +608,7 @@ public class MainViewController {
         });
     }
 
-    private void setPatientsBox() {
+    private void setupPatientsBox() {
         patientsBox.setDisable(true);
         new AutoCompleteBox<>(patientsBox);
         patientsBox.setPromptText("Wybierz pacjenta");
@@ -422,7 +623,7 @@ public class MainViewController {
         });
     }
 
-    private void setDateList() {
+    private void setupDateList() {
         dateList.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(LocalDate item, boolean empty) {
@@ -447,7 +648,7 @@ public class MainViewController {
                 setSelectionMode(SelectionMode.MULTIPLE);
     }
 
-    private void setDatePicker() {
+    private void setupDatePicker() {
         datePicker.setPromptText(pattern);
         datePicker.setConverter(new StringConverter<>() {
             @Override

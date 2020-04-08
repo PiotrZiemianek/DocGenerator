@@ -6,7 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import pl.piotrziemianek.service.FXMLLoaderContainer;
+import pl.piotrziemianek.util.FXMLLoaderContainer;
 
 import java.io.IOException;
 

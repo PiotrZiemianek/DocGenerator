@@ -7,7 +7,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import pl.piotrziemianek.dao.TherapistDao;
 import pl.piotrziemianek.domain.Therapist;
-import pl.piotrziemianek.service.FXMLLoaderContainer;
+import pl.piotrziemianek.util.FXMLLoaderContainer;
 
 public class AddTherapistController {
 

@@ -1,7 +1,5 @@
 package pl.piotrziemianek.controller;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,7 +9,7 @@ import pl.piotrziemianek.dao.PatientDao;
 import pl.piotrziemianek.dao.TherapistDao;
 import pl.piotrziemianek.domain.Patient;
 import pl.piotrziemianek.domain.Therapist;
-import pl.piotrziemianek.service.FXMLLoaderContainer;
+import pl.piotrziemianek.util.FXMLLoaderContainer;
 
 public class AddPatientController {
 

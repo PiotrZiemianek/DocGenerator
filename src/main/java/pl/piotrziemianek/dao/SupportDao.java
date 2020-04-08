@@ -32,19 +32,28 @@ public class SupportDao implements CrudAccessible<Support> {
 
     @Override
     public int create(Support entity) {
-        runInTransaction(session -> session.save(entity));
+        boolean isSuccessful = runInTransaction(session -> session.save(entity));
+        if (!isSuccessful) {
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 
     @Override
     public int update(Support entity) {
-        runInTransaction(session -> session.update(entity));
+        boolean isSuccessful = runInTransaction(session -> session.update(entity));
+        if (!isSuccessful) {
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 
     @Override
     public int createOrUpdate(Support entity) {
-        runInTransaction(session -> session.saveOrUpdate(entity));
+        boolean isSuccessful = runInTransaction(session -> session.saveOrUpdate(entity));
+        if (!isSuccessful) {
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 

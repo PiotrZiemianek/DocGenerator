@@ -1,4 +1,4 @@
-package pl.piotrziemianek.service;
+package pl.piotrziemianek.util;
 
 import javafx.fxml.FXMLLoader;
 

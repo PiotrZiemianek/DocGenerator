@@ -33,19 +33,28 @@ public class SubjectDao implements CrudAccessible<Subject> {
 
     @Override
     public int create(Subject entity) {
-        runInTransaction(session -> session.save(entity));
+        boolean isSuccessful = runInTransaction(session -> session.save(entity));
+        if (!isSuccessful){
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 
     @Override
     public int update(Subject entity) {
-        runInTransaction(session -> session.update(entity));
+        boolean isSuccessful =runInTransaction(session -> session.update(entity));
+        if (!isSuccessful){
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 
     @Override
     public int createOrUpdate(Subject entity) {
-        runInTransaction(session -> session.saveOrUpdate(entity));
+        boolean isSuccessful = runInTransaction(session -> session.saveOrUpdate(entity));
+        if (!isSuccessful){
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 
