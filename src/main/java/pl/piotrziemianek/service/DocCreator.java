@@ -112,6 +112,7 @@ public class DocCreator {
                 if (!therapy.getSubjects().isEmpty()) {
                     for (Subject subject : therapy.getSubjects()) {
                         String sub = subject.getSubject();
+                        if (sub.charAt(sub.length() - 1) != '.') sub = sub.concat(".");
                         subjectsCell.addParagraph().createRun().setText(sub);
                     }
                     subjectsCell.removeParagraph(0);
@@ -122,6 +123,7 @@ public class DocCreator {
                 if (!therapy.getSupports().isEmpty()) {
                     for (Support support : therapy.getSupports()) {
                         String supp = support.getSupport();
+                        if (supp.charAt(supp.length() - 1) != '.') supp = supp.concat(".");
                         supportCell.addParagraph().createRun().setText(supp);
                     }
                     supportCell.removeParagraph(0);

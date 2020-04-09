@@ -2,6 +2,9 @@ package pl.piotrziemianek.controller;
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ListChangeListener.Change;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -146,18 +149,24 @@ public class MainViewController {
             generateBut.setText("Generuj (DOCX)");
             generateBut.setOnAction(event1 -> {
                 TherapiesCard therapiesCard = preTCard.getTherapiesCard();
+                therapiesCard.setTherapies(therapiesTable.getItems());
                 Patient patient = preTCard.getPatient();
                 Therapist therapist = preTCard.getTherapist();
-                therapiesCard.setPatient(patient);
-                therapiesCard.setTherapist(therapist);
+                if (therapiesCard.getPatient() == null) {
+                    therapiesCard.setPatient(patient);
+                }
+
+                if (therapiesCard.getTherapist() == null) {
+                    therapiesCard.setTherapist(therapist);
+                }
 //                int i = therapiesCardDao.createOrUpdate(therapiesCard);
 //                if (i == -1) {
 //                    //todo revert
 //                }
                 DocCreator docCreator = new DocCreator(therapiesCard);
 
-                    String docxPath = docCreator.createDocx();
-                    showDocument(docxPath);
+                String docxPath = docCreator.createDocx();
+                showDocument(docxPath);
 
             });
         });
@@ -269,18 +278,19 @@ public class MainViewController {
             }
         });
 
+        //Subjects cell
         therapySubColl.setCellValueFactory(new PropertyValueFactory<>("subjects"));
         therapySubColl.setCellFactory(col -> {
-            ListView<Subject> listView = getCellListView();
+            ListView<Subject> listView = new ListView<>();
             setupCellWrappingWidth(listView);
             setLVEditableOnMouseDoubleClick(listView, subjectDao, this::setupNewDelSubject);
             return getTableCellAsListView(listView);
         });
 
-
+        //Supports cell
         therapySupColl.setCellValueFactory(new PropertyValueFactory<>("supports"));
         therapySupColl.setCellFactory(col -> {
-            ListView<Support> listView = getCellListView();
+            ListView<Support> listView = new ListView<>();
             setupCellWrappingWidth(listView);
             setLVEditableOnMouseDoubleClick(listView, supportDao, this::setupNewDelSupport);
             return getTableCellAsListView(listView);
@@ -320,6 +330,17 @@ public class MainViewController {
                     setGraphic(null);
                 } else {
                     listView.getItems().setAll(items);
+                    ObservableList<T> listViewItems = listView.getItems();
+                    listViewItems.addListener((Change<? extends T> c) -> {
+                        while (c.next()) {
+                            if (c.wasAdded()) {
+                                items.addAll(c.getAddedSubList());
+                            }
+                            if (c.wasRemoved()) {
+                                items.removeAll(c.getRemoved());
+                            }
+                        }
+                    });
                     listView.setMaxSize(300, 300);
                     setGraphic(listView);
                     setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
