@@ -7,4 +7,4 @@ Java 11,
 Hibernate,
 JavaFX,
 Embeded H2 database,
-Apatche POI.
+Apache POI.
