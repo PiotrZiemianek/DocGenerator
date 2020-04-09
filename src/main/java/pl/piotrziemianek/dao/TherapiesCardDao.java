@@ -33,46 +33,55 @@ public class TherapiesCardDao implements CrudAccessible<TherapiesCard> {
 
     @Override
     public int create(TherapiesCard entity) {
-        runInTransaction(session -> {
-            if (entity.getPatient()!=null){
+        boolean isSuccessful = runInTransaction(session -> {
+            if (entity.getPatient() != null) {
                 session.saveOrUpdate(entity.getPatient());
             }
-            if (entity.getTherapist()!=null){
+            if (entity.getTherapist() != null) {
                 session.saveOrUpdate(entity.getTherapist());
             }
             entity.getTherapies().forEach(session::saveOrUpdate);
             session.save(entity);
         });
+        if (!isSuccessful){
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 
     @Override
     public int update(TherapiesCard entity) {
-        runInTransaction(session -> {
-            if (entity.getPatient()!=null){
+        boolean isSuccessful = runInTransaction(session -> {
+            if (entity.getPatient() != null) {
                 session.saveOrUpdate(entity.getPatient());
             }
-            if (entity.getTherapist()!=null){
+            if (entity.getTherapist() != null) {
                 session.saveOrUpdate(entity.getTherapist());
             }
             entity.getTherapies().forEach(session::saveOrUpdate);
             session.update(entity);
         });
+        if (!isSuccessful){
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 
     @Override
     public int createOrUpdate(TherapiesCard entity) {
-        runInTransaction(session -> {
-            if (entity.getPatient()!=null){
-            session.saveOrUpdate(entity.getPatient());
+        boolean isSuccessful = runInTransaction(session -> {
+            if (entity.getPatient() != null) {
+                session.saveOrUpdate(entity.getPatient());
             }
-            if (entity.getTherapist()!=null){
-            session.saveOrUpdate(entity.getTherapist());
+            if (entity.getTherapist() != null) {
+                session.saveOrUpdate(entity.getTherapist());
             }
             entity.getTherapies().forEach(session::saveOrUpdate);
             session.saveOrUpdate(entity);
         });
+        if (!isSuccessful){
+            entity.setId(-1);
+        }
         return entity.getId();
     }
 

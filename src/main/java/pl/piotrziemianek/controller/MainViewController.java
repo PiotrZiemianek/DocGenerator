@@ -9,6 +9,9 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
@@ -22,14 +25,18 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import pl.piotrziemianek.dao.*;
 import pl.piotrziemianek.domain.*;
+import pl.piotrziemianek.service.DocCreator;
 import pl.piotrziemianek.util.FXMLLoaderContainer;
 import pl.piotrziemianek.util.AutoCompleteBox;
 import pl.piotrziemianek.util.PreTCard;
 
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 import static javafx.scene.control.Alert.*;
@@ -39,7 +46,6 @@ public class MainViewController {
 
     @FXML
     private CheckBox autoCompleteCB;
-
 
     @FXML
     private Button openCardFromHistoryBut;
@@ -130,6 +136,7 @@ public class MainViewController {
     private PatientDao patientDao = new PatientDao();
     private SubjectDao subjectDao = new SubjectDao();
     private SupportDao supportDao = new SupportDao();
+    private TherapiesCardDao therapiesCardDao = new TherapiesCardDao();
     private PreTCard preTCard;
 
     public void initialize() {
@@ -137,7 +144,22 @@ public class MainViewController {
 
         docxMI.setOnAction(event -> {
             generateBut.setText("Generuj (DOCX)");
-//            generateBut.setOnAction(event1 -> ); //todo
+            generateBut.setOnAction(event1 -> {
+                TherapiesCard therapiesCard = preTCard.getTherapiesCard();
+                Patient patient = preTCard.getPatient();
+                Therapist therapist = preTCard.getTherapist();
+                therapiesCard.setPatient(patient);
+                therapiesCard.setTherapist(therapist);
+//                int i = therapiesCardDao.createOrUpdate(therapiesCard);
+//                if (i == -1) {
+//                    //todo revert
+//                }
+                DocCreator docCreator = new DocCreator(therapiesCard);
+
+                    String docxPath = docCreator.createDocx();
+                    showDocument(docxPath);
+
+            });
         });
         pdfMI.setOnAction(event -> {
             generateBut.setText("Generuj (PDF)");
@@ -173,6 +195,28 @@ public class MainViewController {
 
         setupDateList();
 
+    }
+
+    private void showDocument(String docPath) {
+        try {
+
+            File document = new File(docPath);
+            if (document.exists()) {
+
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(document);
+                } else {
+                    System.out.println("Awt Desktop is not supported!");
+                }
+
+            } else {
+                System.out.println("File is not exists!");
+            }
+            System.out.println("Done");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void setupOpenCardFromHistoryBut() {
@@ -258,7 +302,8 @@ public class MainViewController {
                             text.setWrappingWidth(215);
                             setGraphic(text);
                             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-
+                        } else {
+                            setGraphic(null);
                         }
                     }
                 };
@@ -275,7 +320,7 @@ public class MainViewController {
                     setGraphic(null);
                 } else {
                     listView.getItems().setAll(items);
-                    listView.setMaxSize(300,300);
+                    listView.setMaxSize(300, 300);
                     setGraphic(listView);
                     setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                 }
@@ -283,7 +328,7 @@ public class MainViewController {
         };
     }
 
-    private <T> void setLVEditableOnMouseDoubleClick(ListView<T> listView, CrudAccessible<T> dao, BiConsumer<Button[], ListView<T>> setupNewDelButtons) { //todo new Button?
+    private <T> void setLVEditableOnMouseDoubleClick(ListView<T> listView, CrudAccessible<T> dao, BiConsumer<Button[], ListView<T>> setupNewDelButtons) {
         listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
             @Override

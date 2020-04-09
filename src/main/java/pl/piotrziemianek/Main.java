@@ -4,14 +4,19 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import pl.piotrziemianek.domain.*;
+import pl.piotrziemianek.service.DocCreator;
 import pl.piotrziemianek.util.HibernateUtil;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 
 public class Main {
     public static void main(String[] args) {
-      fillDB(HibernateUtil.getSessionFactory());
+        fillDB(HibernateUtil.getSessionFactory());
     }
+
     public static void fillDB(SessionFactory sessionFactory) {
         Patient patient1 = Patient.builder()
                 .firstName("Andrzej")
@@ -45,50 +50,77 @@ public class Main {
                 .lastName("Maj")
                 .build();
 
-        Therapy therapy1 = new Therapy(LocalDate.of(2020,1,5));
-        therapy1.addSubject(new Subject("Dobry temat1"));
-        therapy1.addSupport(new Support("Dobre wspomaganie1"));
+        Therapy therapy1 = new Therapy(LocalDate.of(2020, 1, 5));
+//        therapy1.addSubject(new Subject("Dobry temat1"));
+//        therapy1.addSupport(new Support("Dobre wspomaganie1"));
 
         Therapy therapy2 = new Therapy(LocalDate.now());
-        therapy2.addSubject(new Subject("Dobry temat2"));
-        therapy2.addSupport(new Support("Dobre wspomaganie2"));
+//        therapy2.addSubject(new Subject("Dobry temat2"));
+//        therapy2.addSupport(new Support("Dobre wspomaganie2"));
 
         Subject subject3 = new Subject();
         Support support3 = new Support();
 
         TherapiesCard therapiesCard1 = new TherapiesCard(LocalDate.now());
-        TherapiesCard therapiesCard2 = new TherapiesCard(LocalDate.of(2020,1,1));
+        TherapiesCard therapiesCard2 = new TherapiesCard(LocalDate.of(2020, 1, 1));
 
+        therapiesCard1.setTherapist(therapist1);
+        therapiesCard1.setPatient(patient1);
+        therapiesCard1.addTherapy(therapy1);
+        therapiesCard1.addTherapy(therapy2);
 
-        Session session = sessionFactory.openSession();
-        Transaction transaction = null;
+        DocCreator docCreator = new DocCreator(therapiesCard1);
         try {
-            transaction = session.beginTransaction();
-            session.persist(therapy1);
-            session.persist(therapy2);
-            session.persist(therapist1);
-            session.persist(therapist2);
-            session.persist(therapiesCard1);
-            session.persist(therapiesCard2);
-            session.persist(patient1);
-            session.persist(patient2);
-            session.persist(patient3);
-            session.persist(patient4);
-            session.persist(patient5);
-            session.persist(subject3);
-            session.persist(support3);
+            String docPath = docCreator.createDocx();
 
-            patient5.addTherapist(therapist2);
-            therapiesCard2.addTherapy(therapy2);
-            therapiesCard2.setPatient(patient5);
-            therapiesCard2.setTherapist(therapist2);
-            transaction.commit();
-        } catch (RuntimeException e) {
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
+            File document = new File(docPath);
+            if (document.exists()) {
+
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(document);
+                } else {
+                    System.out.println("Awt Desktop is not supported!");
+                }
+
+            } else {
+                System.out.println("File is not exists!");
             }
+            System.out.println("Done");
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        session.close();
+//        Session session = sessionFactory.openSession();
+//        Transaction transaction = null;
+//        try {
+//            transaction = session.beginTransaction();
+//            session.persist(therapy1);
+//            session.persist(therapy2);
+//            session.persist(therapist1);
+//            session.persist(therapist2);
+//            session.persist(therapiesCard1);
+//            session.persist(therapiesCard2);
+//            session.persist(patient1);
+//            session.persist(patient2);
+//            session.persist(patient3);
+//            session.persist(patient4);
+//            session.persist(patient5);
+//            session.persist(subject3);
+//            session.persist(support3);
+//
+//            patient5.addTherapist(therapist2);
+//            therapiesCard2.addTherapy(therapy2);
+//            therapiesCard2.setPatient(patient5);
+//            therapiesCard2.setTherapist(therapist2);
+//            transaction.commit();
+//        } catch (RuntimeException e) {
+//            if (transaction != null && transaction.isActive()) {
+//                transaction.rollback();
+//            }
+//        }
+//
+//        session.close();
     }
 }
