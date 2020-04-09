@@ -1,5 +1,6 @@
 package pl.piotrziemianek.controller;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -13,6 +14,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -141,6 +143,7 @@ public class MainViewController {
             generateBut.setText("Generuj (PDF)");
 //            generateBut.setOnAction(event1 -> ); //todo
         });
+        pdfMI.fire();
 
         setupOpenCardFromHistoryBut();
 
@@ -207,7 +210,7 @@ public class MainViewController {
 
     private void setTherapiesTable(TherapiesCard therapiesCard) {
         therapiesTable.setItems(FXCollections.observableArrayList(therapiesCard.getTherapies()));
-        therapiesTable.setFixedCellSize(100);
+        therapiesTable.setFixedCellSize(150);
 
         therapyDateColl.setCellValueFactory(new PropertyValueFactory<>("therapyDate"));
         therapyDateColl.setCellFactory(param -> new TableCell<Therapy, LocalDate>() {
@@ -225,6 +228,7 @@ public class MainViewController {
         therapySubColl.setCellValueFactory(new PropertyValueFactory<>("subjects"));
         therapySubColl.setCellFactory(col -> {
             ListView<Subject> listView = getCellListView();
+            setupCellWrappingWidth(listView);
             setLVEditableOnMouseDoubleClick(listView, subjectDao, this::setupNewDelSubject);
             return getTableCellAsListView(listView);
         });
@@ -233,8 +237,32 @@ public class MainViewController {
         therapySupColl.setCellValueFactory(new PropertyValueFactory<>("supports"));
         therapySupColl.setCellFactory(col -> {
             ListView<Support> listView = getCellListView();
+            setupCellWrappingWidth(listView);
             setLVEditableOnMouseDoubleClick(listView, supportDao, this::setupNewDelSupport);
             return getTableCellAsListView(listView);
+        });
+    }
+
+    private <T> void setupCellWrappingWidth(ListView<T> listView) {
+        listView.setCellFactory(new Callback<>() {
+            @Override
+            public ListCell<T> call(ListView<T> list) {
+
+                return new ListCell<>() {
+                    @Override
+                    public void updateItem(T item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (!isEmpty()) {
+                            Text text = new Text(item.toString());
+                            text.setTextAlignment(TextAlignment.CENTER);
+                            text.setWrappingWidth(215);
+                            setGraphic(text);
+                            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+                        }
+                    }
+                };
+            }
         });
     }
 
@@ -247,6 +275,7 @@ public class MainViewController {
                     setGraphic(null);
                 } else {
                     listView.getItems().setAll(items);
+                    listView.setMaxSize(300,300);
                     setGraphic(listView);
                     setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                 }
@@ -320,18 +349,30 @@ public class MainViewController {
                 MultipleSelectionModel<T> selectionModel = allItemsList.getSelectionModel();
                 selectionModel.setSelectionMode(SelectionMode.MULTIPLE);
                 allItemsList.setCellFactory(lv -> {
-                    ListCell<T> cell = new ListCell<>();
+                    ListCell<T> cell = new ListCell<>() {
+                        @Override
+                        public void updateItem(T item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (!isEmpty()) {
+                                Text text = new Text(item.toString());
+                                text.setTextAlignment(TextAlignment.CENTER);
+                                text.setWrappingWidth(230);
+                                setGraphic(text);
+                                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
-                    cell.itemProperty().addListener((observable, oldValue, newValue) -> {
-                        if (oldValue != null) {
-                            cell.textProperty().unbind();
+                            } else {
+                                setGraphic(null);
+                            }
                         }
-                        if (newValue == null) {
-                            cell.textProperty().unbind();
-                        } else {
-                            cell.textProperty().bind(cell.itemProperty().asString());
-                        }
-                    });
+                    };
+
+//                    cell.itemProperty().addListener((observable, oldValue, newValue) -> {
+//
+//                        cell.textProperty().bind(Bindings
+//                                .when(cell.emptyProperty())
+//                                .then("")
+//                                .otherwise(cell.itemProperty().asString()));
+//                    });
 
                     cell.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
                         allItemsList.requestFocus();

@@ -35,12 +35,12 @@
                               </Label>
                         <TableView fx:id="therapiesTable" blendMode="SRC_ATOP" prefHeight="502.0" prefWidth="560.0">
                             <placeholder>
-                                <Label text=""/>
+                                <Label text="" />
                             </placeholder>
                           <columns>
                             <TableColumn fx:id="therapyDateColl" prefWidth="75.0" resizable="false" text="Data" />
-                            <TableColumn fx:id="therapySubColl" prefWidth="239.20001220703125" text="Przebieg zajęć" />
-                              <TableColumn fx:id="therapySupColl" prefWidth="242.39996337890625" text="Działania wspierające rodzinę" />
+                            <TableColumn fx:id="therapySubColl" maxWidth="240.0" prefWidth="240.0" resizable="false" text="Przebieg zajęć" />
+                              <TableColumn fx:id="therapySupColl" maxWidth="240.0" prefWidth="240.0" resizable="false" text="Działania wspierające rodzinę" />
                           </columns>
                         </TableView>
                           </children>
