@@ -25,10 +25,36 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                       <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
             </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-shade-plugin</artifactId>-->
+<!--                <version>3.2.2</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>shade</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <artifactSet>-->
+<!--                                <excludes>-->
+<!--                                    <exclude>classworlds:classworlds</exclude>-->
+<!--                                    <exclude>junit:junit</exclude>-->
+<!--                                    <exclude>jmock:*</exclude>-->
+<!--                                    <exclude>*:xml-apis</exclude>-->
+<!--                                    <exclude>org.apache.maven:lib:tests</exclude>-->
+<!--                                    <exclude>log4j:log4j:jar:</exclude>-->
+<!--                                </excludes>-->
+<!--                            </artifactSet>-->
+<!--                                <finalName>uber-${artifactId}-${version}</finalName>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -117,6 +143,17 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>4.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.documents4j</groupId>
+            <artifactId>documents4j-local</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.documents4j</groupId>
+            <artifactId>documents4j-transformer-msoffice-word</artifactId>
+            <version>1.0.3</version>
         </dependency>
 
     </dependencies>

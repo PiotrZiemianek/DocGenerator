@@ -9,8 +9,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Getter
 @Setter
@@ -110,7 +112,7 @@ public class TherapiesCard implements Serializable {
     }
 
     public String getYearMonthString() {
-        return YearMonth.from(yearMonth).toString();
+        return yearMonth.getMonth().getDisplayName(TextStyle.FULL_STANDALONE, Locale.forLanguageTag("pl")) + " " + yearMonth.getYear();
     }
 
     @Override

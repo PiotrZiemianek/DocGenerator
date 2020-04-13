@@ -51,12 +51,12 @@ public class Main {
                 .build();
 
         Therapy therapy1 = new Therapy(LocalDate.of(2020, 1, 5));
-//        therapy1.addSubject(new Subject("Dobry temat1"));
-//        therapy1.addSupport(new Support("Dobre wspomaganie1"));
+        therapy1.addSubject(new Subject("Dobry temat1"));
+        therapy1.addSupport(new Support("Dobre wspomaganie1"));
 
         Therapy therapy2 = new Therapy(LocalDate.now());
-//        therapy2.addSubject(new Subject("Dobry temat2"));
-//        therapy2.addSupport(new Support("Dobre wspomaganie2"));
+        therapy2.addSubject(new Subject("Dobry temat2"));
+        therapy2.addSupport(new Support("Dobre wspomaganie2"));
 
         Subject subject3 = new Subject();
         Support support3 = new Support();
@@ -70,18 +70,16 @@ public class Main {
         therapiesCard1.addTherapy(therapy2);
 
         DocCreator docCreator = new DocCreator(therapiesCard1);
+        String docPath = docCreator.createPdf();
+        File document = new File(docPath);
+
         try {
-            String docPath = docCreator.createDocx();
-
-            File document = new File(docPath);
             if (document.exists()) {
-
                 if (Desktop.isDesktopSupported()) {
                     Desktop.getDesktop().open(document);
                 } else {
                     System.out.println("Awt Desktop is not supported!");
                 }
-
             } else {
                 System.out.println("File is not exists!");
             }

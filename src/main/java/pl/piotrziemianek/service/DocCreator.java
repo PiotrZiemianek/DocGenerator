@@ -1,5 +1,8 @@
 package pl.piotrziemianek.service;
 
+import com.documents4j.api.DocumentType;
+import com.documents4j.api.IConverter;
+import com.documents4j.job.LocalConverter;
 import com.sun.istack.NotNull;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -9,19 +12,18 @@ import org.apache.xmlbeans.XmlException;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
 import pl.piotrziemianek.domain.*;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class DocCreator {
     private XWPFDocument doc;
 
     {
-        try (FileInputStream fileInputStream = new FileInputStream("template.docx")) {
-            doc = new XWPFDocument(fileInputStream);
+        try (InputStream inputStream = getClass().getResourceAsStream("/template.docx")) {
+            doc = new XWPFDocument(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -32,6 +34,8 @@ public class DocCreator {
     private Therapist therapist;
     private String yearMonth;
     private List<Therapy> therapies;
+    private String pattern = "dd.MM.yyyy";
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
 
     public DocCreator(@NotNull TherapiesCard therapiesCard) {
         this.therapiesCard = therapiesCard;
@@ -45,7 +49,7 @@ public class DocCreator {
         XWPFDocument doc = create();
         String path;
         if (patient != null && yearMonth != null) {
-            path = patient.getLastName() + yearMonth + ".docx";
+            path = patient.getLastName() + YearMonth.from(therapiesCard.getYearMonth()) + ".docx";
         } else {
             path = "karta_terapii" + LocalDate.now() + ".docx";
         }
@@ -59,15 +63,36 @@ public class DocCreator {
         return path;
     }
 
-    public void createPdf() throws IOException {
+    public String createPdf() {
         //todo pdf converter
         XWPFDocument doc = create();
+        String path;
         if (patient != null && yearMonth != null) {
-            doc.write(new FileOutputStream(patient.getLastName() + yearMonth + ".docx"));
+            path = patient.getLastName() + YearMonth.from(therapiesCard.getYearMonth()) + ".pdf";
         } else {
-            doc.write(new FileOutputStream("karta_terapii" + LocalDate.now() + ".docx"));
+            path = "karta_terapii" + LocalDate.now() + ".pdf";
         }
-        doc.close();
+        File outputFile = new File(path);
+        ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+        try {
+            doc.write(arrayOutputStream);
+            doc.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        IConverter converter = LocalConverter.builder().build();
+
+        try (InputStream inputDocxStream = new ByteArrayInputStream(arrayOutputStream.toByteArray());
+             OutputStream outputStream = new FileOutputStream(outputFile)) {
+            arrayOutputStream.close();
+            converter.convert(inputDocxStream).as(DocumentType.DOCX).to(outputStream).as(DocumentType.PDF).execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            converter.shutDown();
+        }
+        return path;
     }
 
     private XWPFDocument create() {
@@ -105,7 +130,7 @@ public class DocCreator {
                 //TherapyDate
                 newRow.getCell(0)
                         .getParagraphArray(0).createRun()
-                        .setText(therapy.getTherapyDate().toString());
+                        .setText(therapy.getTherapyDate().format(dateFormatter));
 
                 //Subjects
                 XWPFTableCell subjectsCell = newRow.getCell(1);

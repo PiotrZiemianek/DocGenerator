@@ -15,6 +15,12 @@ public class PreTCard {
         this.therapiesCard = therapiesCard;
     }
 
+    public PreTCard(TherapiesCard therapiesCard) {
+        this.therapiesCard = therapiesCard;
+        therapist = therapiesCard.getTherapist();
+        patient = therapiesCard.getPatient();
+    }
+
     public Therapist getTherapist() {
         return therapist;
     }

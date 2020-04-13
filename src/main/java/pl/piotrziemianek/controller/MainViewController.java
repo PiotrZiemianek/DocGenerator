@@ -148,21 +148,7 @@ public class MainViewController {
         docxMI.setOnAction(event -> {
             generateBut.setText("Generuj (DOCX)");
             generateBut.setOnAction(event1 -> {
-                TherapiesCard therapiesCard = preTCard.getTherapiesCard();
-                therapiesCard.setTherapies(therapiesTable.getItems());
-                Patient patient = preTCard.getPatient();
-                Therapist therapist = preTCard.getTherapist();
-                if (therapiesCard.getPatient() == null) {
-                    therapiesCard.setPatient(patient);
-                }
-
-                if (therapiesCard.getTherapist() == null) {
-                    therapiesCard.setTherapist(therapist);
-                }
-//                int i = therapiesCardDao.createOrUpdate(therapiesCard);
-//                if (i == -1) {
-//                    //todo revert
-//                }
+                TherapiesCard therapiesCard = genTherapiesCardToPrint();
                 DocCreator docCreator = new DocCreator(therapiesCard);
 
                 String docxPath = docCreator.createDocx();
@@ -172,7 +158,13 @@ public class MainViewController {
         });
         pdfMI.setOnAction(event -> {
             generateBut.setText("Generuj (PDF)");
-//            generateBut.setOnAction(event1 -> ); //todo
+            generateBut.setOnAction(event1 -> {
+                TherapiesCard therapiesCard = genTherapiesCardToPrint();
+                DocCreator docCreator = new DocCreator(therapiesCard);
+
+                String pdfPath = docCreator.createPdf();
+                showDocument(pdfPath);
+            }); //todo
         });
         pdfMI.fire();
 
@@ -206,6 +198,25 @@ public class MainViewController {
 
     }
 
+    private TherapiesCard genTherapiesCardToPrint() {
+        TherapiesCard therapiesCard = preTCard.getTherapiesCard();
+        therapiesCard.setTherapies(therapiesTable.getItems());
+        Patient patient = preTCard.getPatient();
+        Therapist therapist = preTCard.getTherapist();
+        if (therapiesCard.getPatient() == null) {
+            therapiesCard.setPatient(patient);
+        }
+
+        if (therapiesCard.getTherapist() == null) {
+            therapiesCard.setTherapist(therapist);
+        }
+//                int i = therapiesCardDao.createOrUpdate(therapiesCard);
+//                if (i == -1) {
+//                    //todo revert
+//                }
+        return therapiesCard;
+    }
+
     private void showDocument(String docPath) {
         try {
 
@@ -233,7 +244,9 @@ public class MainViewController {
         openCardFromHistoryBut.setOnAction(event -> {
             therapyCardGroup.setDisable(false);
             autoCompleteCB.setVisible(false);
-            setTherapiesTable(cardsHistoryLV.getSelectionModel().getSelectedItem());
+            TherapiesCard therapiesCard = cardsHistoryLV.getSelectionModel().getSelectedItem();
+            preTCard = new PreTCard(therapiesCard);
+            setTherapiesTable(therapiesCard);
         });
     }
 
