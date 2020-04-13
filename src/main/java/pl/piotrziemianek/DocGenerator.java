@@ -28,14 +28,6 @@ public class DocGenerator extends Application {
 
     }
 
-//    @Override
-//    public void stop() {
-//        MainViewController controller = mainFxmlLoader.getController();
-//        //ex. save data to db
-//    }
-
-
-
     public static void main(String[] args) {
         launch(args);
     }

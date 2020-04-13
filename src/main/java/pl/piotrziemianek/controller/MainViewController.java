@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
@@ -46,6 +47,12 @@ import static javafx.scene.control.Alert.*;
 import static javafx.scene.control.ButtonBar.*;
 
 public class MainViewController {
+
+    @FXML
+    private Label therapistLabel;
+
+    @FXML
+    private Label patientLabel;
 
     @FXML
     private CheckBox autoCompleteCB;
@@ -133,6 +140,7 @@ public class MainViewController {
     private Scene addPatientScene = new Scene(addPatient);
 
     //other
+    private ContextMenu delCardCM = new ContextMenu();
     private String pattern = "dd.MM.yyyy";
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
     private TherapistDao therapistDao = new TherapistDao();
@@ -143,16 +151,33 @@ public class MainViewController {
     private PreTCard preTCard;
 
     public void initialize() {
+        autoCompleteCB.setDisable(true);
+
+        MenuItem delCard = new MenuItem("Usuń zaznaczoną kartę");
+        delCard.setOnAction(event -> {
+            MultipleSelectionModel<TherapiesCard> selectionModel = cardsHistoryLV.getSelectionModel();
+            if (selectionModel.getSelectedItem() != null) {
+                TherapiesCard therapiesCard = selectionModel.getSelectedItem();
+                cardsHistoryLV.getItems().remove(therapiesCard);
+                therapiesCard.setPatient(null);
+                therapiesCard.setTherapist(null);
+                therapiesCardDao.delete(therapiesCard.getId());
+            }
+        });
+        delCardCM.getItems().add(delCard);
+
         therapyCardGroup.setDisable(true);
 
         docxMI.setOnAction(event -> {
             generateBut.setText("Generuj (DOCX)");
             generateBut.setOnAction(event1 -> {
                 TherapiesCard therapiesCard = genTherapiesCardToPrint();
-                DocCreator docCreator = new DocCreator(therapiesCard);
+                if (therapiesCard.getId() != -1) {
+                    DocCreator docCreator = new DocCreator(therapiesCard);
 
-                String docxPath = docCreator.createDocx();
-                showDocument(docxPath);
+                    String docxPath = docCreator.createDocx();
+                    showDocument(docxPath);
+                }
 
             });
         });
@@ -160,11 +185,13 @@ public class MainViewController {
             generateBut.setText("Generuj (PDF)");
             generateBut.setOnAction(event1 -> {
                 TherapiesCard therapiesCard = genTherapiesCardToPrint();
-                DocCreator docCreator = new DocCreator(therapiesCard);
+                if (therapiesCard.getId() != -1) {
+                    DocCreator docCreator = new DocCreator(therapiesCard);
 
-                String pdfPath = docCreator.createPdf();
-                showDocument(pdfPath);
-            }); //todo
+                    String pdfPath = docCreator.createPdf();
+                    showDocument(pdfPath);
+                }
+            });
         });
         pdfMI.fire();
 
@@ -176,6 +203,9 @@ public class MainViewController {
             } else {
                 openCardFromHistoryBut.setDisable(true);
             }
+        });
+        cardsHistoryLV.setOnContextMenuRequested(event -> {
+            delCardCM.show(cardsHistoryLV, event.getScreenX(), event.getScreenY());
         });
 
         setupCreateTherapiesCardBut();
@@ -210,10 +240,18 @@ public class MainViewController {
         if (therapiesCard.getTherapist() == null) {
             therapiesCard.setTherapist(therapist);
         }
-//                int i = therapiesCardDao.createOrUpdate(therapiesCard);
-//                if (i == -1) {
-//                    //todo revert
-//                }
+        if (autoCompleteCB.isVisible()) { //visible CB means this is new therapy card - not from history - need to save
+            int i = therapiesCardDao.createOrUpdate(therapiesCard);
+
+            if (i == -1) {
+                if (therapiesCard.getPatient() == patient) therapiesCard.setTherapist(null);
+                if (therapiesCard.getTherapist() == therapist) therapiesCard.setPatient(null);
+                saveFailedAlert("Nie zapisano karty terapii do bazy danych.");
+            } else {
+                cardsHistoryLV.getItems().setAll(therapist.getTherapiesCardList());
+                cardsHistoryLV.getItems().sort(getTherapiesCardComparator(patient));
+            }
+        }
         return therapiesCard;
     }
 
@@ -246,7 +284,7 @@ public class MainViewController {
             autoCompleteCB.setVisible(false);
             TherapiesCard therapiesCard = cardsHistoryLV.getSelectionModel().getSelectedItem();
             preTCard = new PreTCard(therapiesCard);
-            setTherapiesTable(therapiesCard);
+            setTherapiesTable();
         });
     }
 
@@ -260,8 +298,30 @@ public class MainViewController {
             TherapiesCard therapiesCard = new TherapiesCard();
             Patient patient = patientsBox.getSelectionModel().getSelectedItem();
             Therapist therapist = therapistsBox.getSelectionModel().getSelectedItem();
-            for (LocalDate therapyDate : dateList.getItems()) {
-                therapiesCard.addTherapy(new Therapy(therapyDate));
+            ObservableList<TherapiesCard> historyCards = cardsHistoryLV.getItems();
+            if (autoCompleteCB.isSelected() && !historyCards.isEmpty()) {
+//                historyCards.sort(getTherapiesCardComparator(patient));
+                if (cardsHistoryLV.getSelectionModel().getSelectedItem() == null) {
+                    cardsHistoryLV.getSelectionModel().select(0);
+                }
+
+                //getting subjects and supports from selected card
+                List<Therapy> therapiesFromHistory = cardsHistoryLV.getSelectionModel().getSelectedItem().getTherapies();
+                for (int i = 0; i < dateList.getItems().size(); i++) {
+                    LocalDate therapyDate = dateList.getItems().get(i);
+                    Therapy therapy = new Therapy(therapyDate);
+                    if (i < therapiesFromHistory.size()) {
+                        Therapy therapyToInsert = therapiesFromHistory.get(i);
+                        therapyToInsert.getSupports().forEach(therapy::addSupport);
+                        therapyToInsert.getSubjects().forEach(therapy::addSubject);
+                    }
+                    therapiesCard.addTherapy(therapy);
+                }
+            } else {
+                //creating card with empty subjects and supports
+                for (LocalDate therapyDate : dateList.getItems()) {
+                    therapiesCard.addTherapy(new Therapy(therapyDate));
+                }
             }
             therapiesCard.setYearMonth(therapiesCard.getTherapies().stream()
                     .findFirst()
@@ -270,11 +330,28 @@ public class MainViewController {
 
             preTCard = new PreTCard(therapist, patient, therapiesCard);
 
-            setTherapiesTable(therapiesCard);
+            setTherapiesTable();
         });
     }
 
-    private void setTherapiesTable(TherapiesCard therapiesCard) {
+    private Comparator<TherapiesCard> getTherapiesCardComparator(Patient patient) {
+        return (o1, o2) -> {
+            int result;
+            if (patient.equals(o1.getPatient()) && !patient.equals(o2.getPatient())) {
+                result = -1;
+            } else if (!patient.equals(o1.getPatient()) && patient.equals(o2.getPatient())) {
+                result = 1;
+            } else {
+                result = o2.getYearMonth().compareTo(o1.getYearMonth());
+            }
+            return result;
+        };
+    }
+
+    private void setTherapiesTable() {
+        therapistLabel.setText("T: " + preTCard.getTherapist());
+        patientLabel.setText("P: " + preTCard.getPatient());
+        TherapiesCard therapiesCard = preTCard.getTherapiesCard();
         therapiesTable.setItems(FXCollections.observableArrayList(therapiesCard.getTherapies()));
         therapiesTable.setFixedCellSize(150);
 
@@ -342,7 +419,7 @@ public class MainViewController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    listView.getItems().setAll(items);
+                    listView.setItems(FXCollections.observableArrayList(items));
                     ObservableList<T> listViewItems = listView.getItems();
                     listViewItems.addListener((Change<? extends T> c) -> {
                         while (c.next()) {
@@ -579,9 +656,9 @@ public class MainViewController {
         alert.setTitle("Błąd zapisu");
         alert.setHeaderText("Nie zapisano");
         Text text = new Text(content);
-        text.setWrappingWidth(50);
+        text.setWrappingWidth(180);
         alert.getDialogPane().setContent(text);
-
+        alert.getDialogPane().setPadding(new Insets(10, 10, 10, 10));
         alert.showAndWait();
     }
 
@@ -733,11 +810,14 @@ public class MainViewController {
         new AutoCompleteBox<>(patientsBox);
         patientsBox.setPromptText("Wybierz pacjenta");
         patientsBox.setOnAction(event -> {
-            Patient selectedItem = patientsBox.getSelectionModel().getSelectedItem();
-            if (selectedItem != null) {
+            Patient selectedPatient = patientsBox.getSelectionModel().getSelectedItem();
+            if (selectedPatient != null) {
                 delPatientButton.setDisable(false);
+                cardsHistoryLV.getItems().sort(getTherapiesCardComparator(selectedPatient));
+                autoCompleteCB.setDisable(false);
             } else {
                 delPatientButton.setDisable(true);
+                autoCompleteCB.setDisable(true);
             }
             setDisableForNextStageButton();
         });

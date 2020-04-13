@@ -24,15 +24,40 @@
     <children>
         <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="458.0" prefWidth="746.0" VBox.vgrow="ALWAYS">
             <children>
-            <Group fx:id="therapyCardGroup" layoutX="222.0" layoutY="15.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="230.0" AnchorPane.rightAnchor="20.0">
+            <Group fx:id="therapyCardGroup" layoutX="230.0" layoutY="14.0">
                <children>
-                      <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                      <VBox alignment="TOP_CENTER" layoutX="0.5" layoutY="0.5" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                           <children>
-                              <Label alignment="CENTER" prefHeight="18.0" prefWidth="130.0" text="Karta terapii" textAlignment="CENTER" wrapText="true">
-                                  <font>
-                                      <Font name="System Bold" size="22.0" />
-                                  </font>
-                              </Label>
+                        <GridPane gridLinesVisible="true">
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="471.1999755859375" minWidth="10.0" prefWidth="350.400048828125" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="409.60003662109375" minWidth="10.0" prefWidth="209.59995117187498" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                                    <Label alignment="CENTER" prefHeight="18.0" prefWidth="130.0" text="Karta terapii" textAlignment="CENTER" wrapText="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                        <font>
+                                            <Font name="System Bold" size="22.0" />
+                                        </font>
+                                    </Label>
+                              <VBox GridPane.columnIndex="1">
+                                 <children>
+                                    <Label fx:id="therapistLabel" text="Terapeuta">
+                                       <VBox.margin>
+                                          <Insets left="5.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <Label fx:id="patientLabel" text="Pacjent">
+                                       <VBox.margin>
+                                          <Insets left="5.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </GridPane>
                         <TableView fx:id="therapiesTable" blendMode="SRC_ATOP" prefHeight="502.0" prefWidth="560.0">
                             <placeholder>
                                 <Label text="" />
@@ -45,15 +70,15 @@
                         </TableView>
                           </children>
                       </VBox>
-                      <SplitMenuButton fx:id="generateBut" alignment="CENTER" layoutX="427.0" layoutY="544.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="133.0" text="Generuj (PDF)" textAlignment="CENTER">
+                      <SplitMenuButton fx:id="generateBut" alignment="CENTER" layoutX="427.5" layoutY="544.5" mnemonicParsing="false" prefHeight="26.0" prefWidth="133.0" text="Generuj (PDF)" textAlignment="CENTER">
                           <items>
                               <MenuItem fx:id="pdfMI" mnemonicParsing="false" text="PDF" />
                               <MenuItem fx:id="docxMI" mnemonicParsing="false" text="DOCX (Word)" />
                           </items>
                       </SplitMenuButton>
-                  <CheckBox fx:id="autoCompleteCB" layoutX="2.0" layoutY="544.0" mnemonicParsing="false" selected="true" text="Autouzupełnianie na podstawie wskazanej karty z historii" />
                </children>
             </Group>
+            <CheckBox fx:id="autoCompleteCB" layoutX="232.5" layoutY="558.5" mnemonicParsing="false" selected="true" text="Autouzupełnianie na podstawie wskazanej karty z historii" />
                   <ListView fx:id="cardsHistoryLV" layoutX="20.0" layoutY="357.0" prefHeight="196.0" prefWidth="200.0" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="20.0">
                       <opaqueInsets>
                           <Insets />

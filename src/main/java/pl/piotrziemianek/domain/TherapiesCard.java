@@ -51,7 +51,7 @@ public class TherapiesCard implements Serializable {
             this.therapist = therapist;
             therapist.getTherapiesCardList().add(this);
         } else {
-            this.patient = null;
+            this.therapist = null;
         }
     }
 
