@@ -1,8 +1,6 @@
 package pl.piotrziemianek.controller;
 
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -11,11 +9,11 @@ import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
@@ -30,8 +28,8 @@ import javafx.util.StringConverter;
 import pl.piotrziemianek.dao.*;
 import pl.piotrziemianek.domain.*;
 import pl.piotrziemianek.service.DocCreator;
-import pl.piotrziemianek.util.FXMLLoaderContainer;
 import pl.piotrziemianek.util.AutoCompleteBox;
+import pl.piotrziemianek.util.FXMLLoaderContainer;
 import pl.piotrziemianek.util.PreTCard;
 
 import java.awt.*;
@@ -39,12 +37,12 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 
-import static javafx.scene.control.Alert.*;
-import static javafx.scene.control.ButtonBar.*;
+import static javafx.scene.control.Alert.AlertType;
+import static javafx.scene.control.ButtonBar.ButtonData;
 
 public class MainViewController {
 
@@ -125,7 +123,7 @@ public class MainViewController {
         }
     }
 
-    private Scene addTherapistScene = new Scene(addTherapist);
+    private final Scene addTherapistScene = new Scene(addTherapist);
 
     private Parent addPatient;
 
@@ -137,17 +135,17 @@ public class MainViewController {
         }
     }
 
-    private Scene addPatientScene = new Scene(addPatient);
+    private final Scene addPatientScene = new Scene(addPatient);
 
     //other
-    private ContextMenu delCardCM = new ContextMenu();
-    private String pattern = "dd.MM.yyyy";
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-    private TherapistDao therapistDao = new TherapistDao();
-    private PatientDao patientDao = new PatientDao();
-    private SubjectDao subjectDao = new SubjectDao();
-    private SupportDao supportDao = new SupportDao();
-    private TherapiesCardDao therapiesCardDao = new TherapiesCardDao();
+    private final ContextMenu delCardCM = new ContextMenu();
+    private final String pattern = "dd.MM.yyyy";
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+    private final TherapistDao therapistDao = new TherapistDao();
+    private final PatientDao patientDao = new PatientDao();
+    private final SubjectDao subjectDao = new SubjectDao();
+    private final SupportDao supportDao = new SupportDao();
+    private final TherapiesCardDao therapiesCardDao = new TherapiesCardDao();
     private PreTCard preTCard;
 
     public void initialize() {
@@ -197,16 +195,10 @@ public class MainViewController {
 
         setupOpenCardFromHistoryBut();
 
-        cardsHistoryLV.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                openCardFromHistoryBut.setDisable(false);
-            } else {
-                openCardFromHistoryBut.setDisable(true);
-            }
-        });
-        cardsHistoryLV.setOnContextMenuRequested(event -> {
-            delCardCM.show(cardsHistoryLV, event.getScreenX(), event.getScreenY());
-        });
+        cardsHistoryLV.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->
+                openCardFromHistoryBut.setDisable(newValue == null));
+        cardsHistoryLV.setOnContextMenuRequested(event ->
+                delCardCM.show(cardsHistoryLV, event.getScreenX(), event.getScreenY()));
 
         setupCreateTherapiesCardBut();
 
@@ -300,7 +292,6 @@ public class MainViewController {
             Therapist therapist = therapistsBox.getSelectionModel().getSelectedItem();
             ObservableList<TherapiesCard> historyCards = cardsHistoryLV.getItems();
             if (autoCompleteCB.isSelected() && !historyCards.isEmpty()) {
-//                historyCards.sort(getTherapiesCardComparator(patient));
                 if (cardsHistoryLV.getSelectionModel().getSelectedItem() == null) {
                     cardsHistoryLV.getSelectionModel().select(0);
                 }
@@ -356,7 +347,7 @@ public class MainViewController {
         therapiesTable.setFixedCellSize(150);
 
         therapyDateColl.setCellValueFactory(new PropertyValueFactory<>("therapyDate"));
-        therapyDateColl.setCellFactory(param -> new TableCell<Therapy, LocalDate>() {
+        therapyDateColl.setCellFactory(param -> new TableCell<>() {
             @Override
             public void updateItem(LocalDate localDate, boolean empty) {
                 super.updateItem(localDate, empty);
@@ -412,7 +403,7 @@ public class MainViewController {
     }
 
     private <T> TableCell<Therapy, Set<T>> getTableCellAsListView(ListView<T> listView) {
-        return new TableCell<Therapy, Set<T>>() {
+        return new TableCell<>() {
             @Override
             public void updateItem(Set<T> items, boolean empty) {
                 super.updateItem(items, empty);
@@ -440,7 +431,7 @@ public class MainViewController {
     }
 
     private <T> void setLVEditableOnMouseDoubleClick(ListView<T> listView, CrudAccessible<T> dao, BiConsumer<Button[], ListView<T>> setupNewDelButtons) {
-        listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        listView.setOnMouseClicked(new EventHandler<>() {
 
             @Override
             public void handle(MouseEvent click) {
@@ -548,7 +539,7 @@ public class MainViewController {
         });
     }
 
-    private void setupNewDelSupport(Button[] newDelButtons, ListView listView) {
+    private void setupNewDelSupport(Button[] newDelButtons, ListView<Support> listView) {
         Button newButton = newDelButtons[0];
         Button delButton = newDelButtons[1];
         newButton.setOnAction(event -> {
@@ -565,7 +556,7 @@ public class MainViewController {
                     int i = supportDao.create(support);
 
                     if (i != -1) {
-                        ((ListView<Support>) listView).getItems().add(support);
+                        listView.getItems().add(support);
                     } else {
                         saveFailedAlert("Upewnij się czy nie istnieje już takie wspomaganie w systemie.");
                     }
@@ -576,7 +567,7 @@ public class MainViewController {
         });
         delButton.setOnAction(event -> {
             ChoiceDialog<Support> delCB = new ChoiceDialog<>();
-            delCB.getItems().setAll(((ListView<Support>) listView).getItems());
+            delCB.getItems().setAll(listView.getItems());
             delCB.setTitle("Usuwanie");
             delCB.setHeaderText("Które wspomaganie usunąć?");
             delCB.setContentText(null);
@@ -594,7 +585,7 @@ public class MainViewController {
         });
     }
 
-    private void setupNewDelSubject(Button[] newDelButtons, ListView listView) {
+    private void setupNewDelSubject(Button[] newDelButtons, ListView<Subject> listView) {
         Button newButton = newDelButtons[0];
         Button delButton = newDelButtons[1];
         newButton.setOnAction(event -> {
@@ -611,7 +602,7 @@ public class MainViewController {
                     int i = subjectDao.create(subject);
 
                     if (i != -1) {
-                        ((ListView<Subject>) listView).getItems().add(subject);
+                        listView.getItems().add(subject);
                     } else {
                         saveFailedAlert("Upewnij się czy nie istnieje już taki temat zajęć w systemie.");
                     }
@@ -622,7 +613,7 @@ public class MainViewController {
         });
         delButton.setOnAction(event -> {
             ChoiceDialog<Subject> delCB = new ChoiceDialog<>();
-            delCB.getItems().setAll(((ListView<Subject>) listView).getItems());
+            delCB.getItems().setAll(listView.getItems());
             delCB.setTitle("Usuwanie");
             delCB.setHeaderText("Który temat zajęć usunąć?");
             delCB.setContentText(null);
@@ -660,24 +651,6 @@ public class MainViewController {
         alert.getDialogPane().setContent(text);
         alert.getDialogPane().setPadding(new Insets(10, 10, 10, 10));
         alert.showAndWait();
-    }
-
-    private <T> ListView<T> getCellListView() {
-        ListView<T> listView = new ListView<>();
-        listView.setMaxHeight(100);
-
-        listView.setCellFactory(lv -> new ListCell<T>() {
-            @Override
-            public void updateItem(T item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                } else {
-                    setText(item.toString());
-                }
-            }
-        });
-        return listView;
     }
 
     private void setupNewTherapistButton() {
@@ -904,11 +877,7 @@ public class MainViewController {
     private void setDisableForNextStageButton() {
         boolean isTherapistAndPatientSelected = patientsBox.getSelectionModel().getSelectedItem() != null
                 && therapistsBox.getSelectionModel().getSelectedItem() != null;
-        if (isTherapistAndPatientSelected) {
-            createTherapiesCard.setDisable(false);
-        } else {
-            createTherapiesCard.setDisable(true);
-        }
+        createTherapiesCard.setDisable(!isTherapistAndPatientSelected);
     }
 
     protected ComboBox<Therapist> getTherapistsBox() {
